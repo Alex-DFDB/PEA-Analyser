@@ -1,6 +1,9 @@
-// components/Positions/PositionForm.tsx
 import { useState } from "react";
 
+/**
+ * PositionForm allows users to add new positions to their portfolio
+ * Validates required fields before submission
+ */
 const PositionForm = ({
     onSubmit,
     //onCancel,
@@ -18,6 +21,10 @@ const PositionForm = ({
         color: "",
     });
 
+    /**
+     * Handles form submission after validation
+     * Resets form after successful submission
+     */
     const handleSubmit = () => {
         if (!form.ticker || !form.quantity || !form.buyPrice) return;
 
@@ -42,14 +49,14 @@ const PositionForm = ({
                 disabled={loading}
             />
             <input
-                placeholder="Nom (optionnel)"
+                placeholder="Name (optional)"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="bg-gray-700 rounded px-3 py-2 text-sm"
                 disabled={loading}
             />
             <input
-                placeholder="Quantité"
+                placeholder="Quantity"
                 type="number"
                 value={form.quantity}
                 onChange={(e) => setForm({ ...form, quantity: e.target.value })}
@@ -57,7 +64,7 @@ const PositionForm = ({
                 disabled={loading}
             />
             <input
-                placeholder="Prix achat (€)"
+                placeholder="Buy price (€)"
                 type="number"
                 value={form.buyPrice}
                 onChange={(e) => setForm({ ...form, buyPrice: e.target.value })}
@@ -71,7 +78,7 @@ const PositionForm = ({
                     onChange={(e) => setForm({ ...form, color: e.target.value })}
                     className="w-10 h-8 bg-gray-700 rounded cursor-pointer"
                     disabled={loading}
-                    title="Couleur"
+                    title="Color"
                 />
                 <button
                     onClick={() => setForm({ ...form, color: "" })}
@@ -86,7 +93,7 @@ const PositionForm = ({
                 disabled={loading}
                 className="col-span-2 md:col-span-5 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded py-2 text-sm"
             >
-                {loading ? "Chargement..." : "Valider"}
+                {loading ? "Adding Position..." : "Add Position"}
             </button>
         </div>
     );

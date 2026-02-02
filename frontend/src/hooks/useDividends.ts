@@ -25,6 +25,11 @@ export type DividendEvent = {
     priceAtPayment?: number;
 };
 
+/**
+ * Hook for fetching and managing dividend data for portfolio positions
+ * @param positions Array of portfolio positions
+ * @returns Object containing dividend data, events, statistics, and helper functions
+ */
 export function useDividends(positions: Position[]) {
     const [dividendData, setDividendData] = useState<DividendData[]>([]);
     const [events, setEvents] = useState<DividendEvent[]>([]);
@@ -51,12 +56,12 @@ export function useDividends(positions: Position[]) {
                     body: JSON.stringify({ tickers }),
                 });
 
-                if (!response.ok) throw new Error("Erreur API dividendes");
+                if (!response.ok) throw new Error("Dividends API error");
 
                 const data: DividendData[] = await response.json();
                 setDividendData(data);
 
-                // Convertir en événements pour le calendrier
+                // Convert to events for the calendar
                 const allEvents: DividendEvent[] = [];
                 data.forEach((divData) => {
                     const position = positions.find((p) => p.ticker === divData.ticker);
@@ -77,9 +82,9 @@ export function useDividends(positions: Position[]) {
                 setEvents(allEvents);
             } catch (err) {
                 const errorMessage =
-                    err instanceof Error ? err.message : "Erreur lors de la récupération des dividendes";
+                    err instanceof Error ? err.message : "Error fetching dividends";
                 setError(errorMessage);
-                console.error("Erreur lors de la récupération des dividendes:", err);
+                console.error("Error fetching dividends:", err);
             } finally {
                 setLoading(false);
             }
@@ -88,22 +93,22 @@ export function useDividends(positions: Position[]) {
         fetchDividends();
     }, [positions]);
 
-    // Calculer les statistiques à partir des événements
+    // Calculate statistics from events
     const totalAmount = events.reduce((sum, e) => sum + e.amount, 0);
 
     const lastPaymentDate = events.length > 0 ? new Date(Math.max(...events.map((e) => e.date.getTime()))) : null;
 
-    // Filtrer les événements par année
+    // Filter events by year
     const getEventsByYear = (year: number) => {
         return events.filter((e) => e.date.getFullYear() === year);
     };
 
-    // Calculer le total pour une année
+    // Calculate total for a year
     const getYearTotal = (year: number) => {
         return getEventsByYear(year).reduce((sum, e) => sum + e.amount, 0);
     };
 
-    // Calculer le nombre total de paiements
+    // Calculate total number of payments
     const totalPayments = events.length;
 
     return {

@@ -1,4 +1,3 @@
-// components/Projection/ProjectionPanel.tsx
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp } from "lucide-react";
@@ -9,6 +8,11 @@ import { calculateTotals } from "../../utils/calculations";
 import { calculateProjection } from "../../utils/projections";
 import { getPositionColor } from "../../utils/colors";
 
+/**
+ * ProjectionPanel displays future value projections based on historical returns
+ * Offers two views: detailed (per position) and total (with/without dividends)
+ * Projections assume dividend reinvestment where applicable
+ */
 const ProjectionPanel = ({
     positions,
     historicalReturns,
@@ -32,7 +36,7 @@ const ProjectionPanel = ({
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-green-400" />
-                    <h2 className="font-semibold">Projection de croissance</h2>
+                    <h2 className="font-semibold">Growth Projection</h2>
                 </div>
                 <ProjectionControls
                     years={projectionYears}
@@ -45,9 +49,9 @@ const ProjectionPanel = ({
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={projectionData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="year" tickFormatter={(y) => `Année ${y}`} stroke="#9ca3af" fontSize={12} />
-                    <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k€`} stroke="#9ca3af" fontSize={12} />
-                    <Tooltip formatter={(v) => `${Number(v).toFixed(0)} €`} labelFormatter={(y) => `Année ${y}`} />
+                    <XAxis dataKey="year" tickFormatter={(y) => `Year ${y}`} stroke="#9ca3af" fontSize={12} />
+                    <YAxis tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} stroke="#9ca3af" fontSize={12} />
+                    <Tooltip formatter={(v) => `€${Number(v).toFixed(0)}`} labelFormatter={(y) => `Year ${y}`} />
                     <Legend />
                     {detailedView ? (
                         positions.map((p, i) => (
@@ -69,7 +73,7 @@ const ProjectionPanel = ({
                                 stroke="#10b981"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Avec dividendes réinvestis"
+                                name="With Reinvested Dividends"
                             />
                             <Line
                                 type="monotone"
@@ -77,7 +81,7 @@ const ProjectionPanel = ({
                                 stroke="#3b82f6"
                                 strokeWidth={2}
                                 dot={false}
-                                name="Sans dividendes"
+                                name="Without Dividends"
                             />
                         </>
                     )}
@@ -85,32 +89,31 @@ const ProjectionPanel = ({
             </ResponsiveContainer>
             <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-center">
                 <div className="bg-gray-700 rounded p-2">
-                    <p className="text-gray-400">Valeur actuelle</p>
-                    <p className="text-blue-400 font-bold">{totalValue.toFixed(0)} €</p>
+                    <p className="text-gray-400">Current Portfolio Value</p>
+                    <p className="text-blue-400 font-bold">€{totalValue.toFixed(0)}</p>
                 </div>
                 {detailedView ? (
                     <div className="bg-gray-700 rounded p-2">
-                        <p className="text-gray-400">Valeur projetée ({projectionYears} ans)</p>
+                        <p className="text-gray-400">Projected Value ({projectionYears} years)</p>
                         <p className="text-green-400 font-bold">
-                            {Object.values(projectionData[projectionData.length - 1] || {})
+                            €{Object.values(projectionData[projectionData.length - 1] || {})
                                 .filter((v) => typeof v === "number")
                                 .reduce((sum: number, v) => sum + (v as number), 0)
-                                .toFixed(0)}{" "}
-                            €
+                                .toFixed(0)}
                         </p>
                     </div>
                 ) : (
                     <>
                         <div className="bg-gray-700 rounded p-2">
-                            <p className="text-gray-400">Sans dividendes ({projectionYears} ans)</p>
+                            <p className="text-gray-400">Without Dividends ({projectionYears} years)</p>
                             <p className="text-blue-400 font-bold">
-                                {projectionData[projectionData.length - 1]?.withoutDividends.toFixed(0)} €
+                                €{projectionData[projectionData.length - 1]?.withoutDividends.toFixed(0)}
                             </p>
                         </div>
                         <div className="bg-gray-700 rounded p-2 col-span-2">
-                            <p className="text-gray-400">Avec dividendes réinvestis ({projectionYears} ans)</p>
+                            <p className="text-gray-400">With Reinvested Dividends ({projectionYears} years)</p>
                             <p className="text-green-400 font-bold">
-                                {projectionData[projectionData.length - 1]?.withDividends.toFixed(0)} €
+                                €{projectionData[projectionData.length - 1]?.withDividends.toFixed(0)}
                             </p>
                         </div>
                     </>

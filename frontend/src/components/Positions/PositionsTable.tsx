@@ -1,4 +1,3 @@
-// components/Positions/PositionsTable.tsx
 import { useState } from "react";
 
 import PositionsActions from "./PositionsActions";
@@ -10,6 +9,10 @@ import { useQuote } from "../../hooks/useQuote";
 import { useQuotes } from "../../hooks/useQuotes";
 import { generateRandomColor } from "../../utils/colors";
 
+/**
+ * PositionsTable manages the display and manipulation of portfolio positions
+ * Handles adding positions (manually or via JSON import), deleting positions, and updating prices
+ */
 const PositionsTable = ({
     positions,
     addPosition,
@@ -33,6 +36,10 @@ const PositionsTable = ({
     const { fetchQuote, loading: addLoading } = useQuote();
     const { fetchQuotes } = useQuotes();
 
+    /**
+     * Handles adding a new position with real-time price data
+     * Falls back to buy price if quote fetch fails
+     */
     const handleAddPosition = async (
         ticker: string,
         name: string,
@@ -57,7 +64,7 @@ const PositionsTable = ({
             await fetchHistoricalData([ticker]);
             setShowForm(false);
         } catch (error) {
-            alert("Impossible de récupérer les informations. Position ajoutée avec prix d'achat.");
+            alert("Unable to fetch quote data. Position added with buy price.");
 
             const newPosition: Position = {
                 ticker: ticker.toUpperCase(),
@@ -73,6 +80,10 @@ const PositionsTable = ({
         }
     };
 
+    /**
+     * Handles JSON file upload for bulk position import
+     * Fetches current prices for all tickers and merges with existing positions
+     */
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -115,7 +126,7 @@ const PositionsTable = ({
                         setPositions(updatedPositions);
                         await fetchHistoricalData(tickers);
                     } catch (error) {
-                        alert("Impossible de récupérer les prix. Positions ajoutées avec prix d'achat.");
+                        alert("Unable to fetch prices. Positions added with buy prices.");
                         const newPositions = data.map((p) => ({
                             ticker: p.ticker.toUpperCase(),
                             quantity: p.quantity,
@@ -141,7 +152,7 @@ const PositionsTable = ({
                     }
                 }
             } catch {
-                alert("JSON invalide");
+                alert("Invalid JSON file");
                 setUploadLoading(false);
             }
         };
@@ -167,19 +178,19 @@ const PositionsTable = ({
             )}
 
             {positions.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">Aucune position</p>
+                <p className="text-gray-500 text-center py-8">No positions yet. Click "Add" to get started.</p>
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="text-gray-400 text-left">
                                 <th className="pb-2">Ticker</th>
-                                <th className="pb-2">Qté</th>
-                                <th className="pb-2">Prix achat</th>
-                                <th className="pb-2">Cours</th>
-                                <th className="pb-2">Valeur</th>
-                                <th className="pb-2">+/- Value</th>
-                                <th className="pb-2">Div. moy. 5 ans (%)</th>
+                                <th className="pb-2">Quantity</th>
+                                <th className="pb-2">Buy Price</th>
+                                <th className="pb-2">Current Price</th>
+                                <th className="pb-2">Total Value</th>
+                                <th className="pb-2">Profit/Loss</th>
+                                <th className="pb-2">Avg. Dividend (5Y)</th>
                                 <th className="pb-2"></th>
                             </tr>
                         </thead>

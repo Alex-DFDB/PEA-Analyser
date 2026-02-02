@@ -1,5 +1,7 @@
-// components/Projection/ProjectionControls.tsx
-
+/**
+ * ProjectionControls provides UI controls for projection settings
+ * Allows users to adjust projection years and toggle between detailed/total views
+ */
 const ProjectionControls = ({
     years,
     onYearsChange,
@@ -16,7 +18,7 @@ const ProjectionControls = ({
     return (
         <div className="flex gap-4 text-sm items-center">
             <label className="flex items-center gap-2">
-                <span className="text-gray-400">Années:</span>
+                <span className="text-gray-400">Years:</span>
                 <input
                     type="number"
                     value={years}
@@ -27,13 +29,13 @@ const ProjectionControls = ({
                 />
             </label>
             <div className="text-gray-400 text-xs">
-                {hasData ? "Basé sur 5 ans d'historique" : "Cliquez sur Actualiser"}
+                {hasData ? "Based on 5-year historical data" : "Click 'Refresh Prices' to load data"}
             </div>
             <button
                 onClick={onViewToggle}
                 className={`px-3 py-1 rounded text-sm ${detailedView ? "bg-blue-600" : "bg-gray-600"} hover:opacity-80`}
             >
-                {detailedView ? "Vue détaillée" : "Vue totale"}
+                {detailedView ? "Detailed View" : "Total View"}
             </button>
         </div>
     );

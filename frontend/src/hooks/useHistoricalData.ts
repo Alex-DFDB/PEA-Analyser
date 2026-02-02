@@ -4,6 +4,10 @@ import { useState } from "react";
 import { API_URL } from "../utils/constants";
 import { calculateHistoricalReturn } from "../utils/projections";
 
+/**
+ * Hook for fetching and managing historical price data
+ * @returns Object containing historical returns, data, and fetch function
+ */
 export function useHistoricalData() {
     const [historicalReturns, setHistoricalReturns] = useState<{ [ticker: string]: number }>({});
     const [historicalData, setHistoricalData] = useState<{ [ticker: string]: any[] }>({});
@@ -16,7 +20,7 @@ export function useHistoricalData() {
                 body: JSON.stringify({ tickers }),
             });
 
-            if (!response.ok) throw new Error("Erreur API historique");
+            if (!response.ok) throw new Error("Historical data API error");
 
             const data = await response.json();
             const returns: { [ticker: string]: number } = {};
@@ -32,7 +36,7 @@ export function useHistoricalData() {
             setHistoricalReturns(returns);
             setHistoricalData(historical);
         } catch (error) {
-            console.error("Impossible de récupérer les données historiques:", error);
+            console.error("Unable to fetch historical data:", error);
         }
     };
 

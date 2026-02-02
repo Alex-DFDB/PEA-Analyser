@@ -3,37 +3,83 @@ import { useState } from "react";
 import type { Position } from "../../types";
 import type { DividendEvent } from "../../hooks/useDividends";
 
-// Fonction pour calculer l'intensité de la couleur orange basée sur le rendement
+/**
+ * Color scheme constants for dividend yield visualization
+ * Uses HSL color space to create a gradient from light to dark orange based on yield intensity
+ */
+const COLOR_CONSTANTS = {
+    NO_DIVIDEND: "#1f2937",
+    ORANGE_HUE: 25,
+    BASE_SATURATION: 70,
+    MAX_SATURATION: 100,
+    BASE_LIGHTNESS: 65,
+    MIN_LIGHTNESS: 30,
+    MAX_YIELD_THRESHOLD: 10,
+} as const;
+
+const LOCALE = "en-US";
+const YEAR_RANGE_LIMIT = 10;
+
+interface DividendSummary {
+    ticker: string;
+    dividends: Array<{
+        date: string;
+        amount: number;
+        yield?: number;
+    }>;
+}
+
+interface DividendStateProps {
+    dividendData: DividendSummary[];
+    loading: boolean;
+    error: string | null;
+    totalAmount: number;
+    totalPayments: number;
+    lastPaymentDate: Date | null;
+    getEventsByYear: (year: number) => DividendEvent[];
+    getYearTotal: (year: number) => number;
+}
+
+/**
+ * Calculates color intensity based on dividend yield
+ * Higher yields result in darker, more saturated orange colors
+ * @param totalYield - The total dividend yield percentage
+ * @returns HSL color string
+ */
 const getDividendColor = (totalYield: number): string => {
     if (totalYield === 0) {
-        return "#1f2937"; // Gris foncé pour pas de dividende
+        return COLOR_CONSTANTS.NO_DIVIDEND;
     }
 
-    // Échelle basée sur le rendement en % (ajuster selon vos besoins)
-    const intensity = Math.min(totalYield / 10, 1); // Max à 10%
+    const intensity = Math.min(totalYield / COLOR_CONSTANTS.MAX_YIELD_THRESHOLD, 1);
 
-    // Dégradé d'orange du clair au foncé
-    const hue = 25; // Orange
-    const saturation = 70 + intensity * 30; // 70-100%
-    const lightness = 65 - intensity * 35; // 65-30%
+    const hue = COLOR_CONSTANTS.ORANGE_HUE;
+    const saturation = COLOR_CONSTANTS.BASE_SATURATION + intensity * (COLOR_CONSTANTS.MAX_SATURATION - COLOR_CONSTANTS.BASE_SATURATION);
+    const lightness = COLOR_CONSTANTS.BASE_LIGHTNESS - intensity * (COLOR_CONSTANTS.BASE_LIGHTNESS - COLOR_CONSTANTS.MIN_LIGHTNESS);
 
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 };
 
-// Obtenir les jours d'un mois
+/**
+ * Generates an array of dates for a calendar month, including padding days
+ * Calendar starts on Monday (ISO 8601 standard)
+ * @param year - The year
+ * @param month - The month (0-11)
+ * @returns Array of Date objects representing the calendar grid
+ */
 const getDaysInMonth = (year: number, month: number): Date[] => {
     const days: Date[] = [];
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
-    // Ajouter les jours vides du début (pour aligner le calendrier)
+    // Add empty days at the beginning to align the calendar (Monday start)
     const startPadding = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
     for (let i = 0; i < startPadding; i++) {
         days.push(new Date(year, month, -i));
     }
     days.reverse();
 
-    // Ajouter tous les jours du mois
+    // Add all days of the month
     for (let day = 1; day <= lastDay.getDate(); day++) {
         days.push(new Date(year, month, day));
     }
@@ -41,12 +87,21 @@ const getDaysInMonth = (year: number, month: number): Date[] => {
     return days;
 };
 
-// Composant calendrier mensuel
-const MonthCalendar = ({ year, month, events }: { year: number; month: number; events: DividendEvent[] }) => {
-    const days = getDaysInMonth(year, month);
-    const monthName = new Date(year, month).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+interface MonthCalendarProps {
+    year: number;
+    month: number;
+    events: DividendEvent[];
+}
 
-    // Grouper les événements par jour
+/**
+ * MonthCalendar displays a single month with dividend events
+ * Days with dividends are colored based on yield intensity
+ */
+const MonthCalendar = ({ year, month, events }: MonthCalendarProps) => {
+    const days = getDaysInMonth(year, month);
+    const monthName = new Date(year, month).toLocaleDateString(LOCALE, { month: "long", year: "numeric" });
+
+    // Group events by day for efficient lookup
     const eventsByDay = events.reduce(
         (acc, event) => {
             const key = event.date.toDateString();
@@ -61,16 +116,13 @@ const MonthCalendar = ({ year, month, events }: { year: number; month: number; e
         <div className="bg-gray-700/50 rounded-lg p-3">
             <h3 className="text-sm font-semibold mb-3 capitalize text-center">{monthName}</h3>
 
-            {/* Jours de la semaine */}
             <div className="grid grid-cols-7 gap-1 mb-2">
-                {["L", "M", "M", "J", "V", "S", "D"].map((day, i) => (
+                {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
                     <div key={i} className="text-center text-xs text-gray-500 font-medium">
                         {day}
                     </div>
                 ))}
             </div>
-
-            {/* Grille des jours */}
             <div className="grid grid-cols-7 gap-1">
                 {days.map((day, i) => {
                     const isCurrentMonth = day.getMonth() === month;
@@ -86,16 +138,12 @@ const MonthCalendar = ({ year, month, events }: { year: number; month: number; e
                 ${dayEvents.length > 0 ? "cursor-pointer hover:ring-2 ring-orange-400" : ""}
               `}
                             style={{
-                                backgroundColor:
-                                    isCurrentMonth && dayEvents.length > 0 ? getDividendColor(totalYield) : "#1f2937",
+                                backgroundColor: isCurrentMonth && dayEvents.length > 0 ? getDividendColor(totalYield) : "#1f2937",
                             }}
                             title={
                                 dayEvents.length > 0
                                     ? dayEvents
-                                          .map(
-                                              (e) =>
-                                                  `${e.ticker}: ${e.yield ? `${e.yield.toFixed(2)}%` : `${e.amount.toFixed(2)}€`}`,
-                                          )
+                                          .map((e) => `${e.ticker}: ${e.yield ? `${e.yield.toFixed(2)}%` : `${e.amount.toFixed(2)}€`}`)
                                           .join("\n")
                                     : ""
                             }
@@ -114,36 +162,29 @@ const MonthCalendar = ({ year, month, events }: { year: number; month: number; e
     );
 };
 
-// Composant principal
-const DividendCalendar = ({
-    positions,
-    dividendState,
-}: {
+interface DividendCalendarProps {
     positions: Position[];
-    dividendState: {
-        dividendData: any[];
-        loading: boolean;
-        error: string | null;
-        totalAmount: number;
-        totalPayments: number;
-        lastPaymentDate: Date | null;
-        getEventsByYear: (year: number) => any[];
-        getYearTotal: (year: number) => number;
-    };
-}) => {
+    dividendState: DividendStateProps;
+}
+
+/**
+ * DividendCalendar is the main component that displays dividend information
+ * Shows a 12-month calendar view with dividend payments colored by yield intensity
+ * Includes summary statistics and detailed breakdown by ticker
+ */
+const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) => {
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-    const { dividendData, loading, error, totalAmount, totalPayments, lastPaymentDate, getEventsByYear, getYearTotal } =
-        dividendState;
+    const { dividendData, loading, error, totalAmount, totalPayments, lastPaymentDate, getEventsByYear, getYearTotal } = dividendState;
 
     if (positions.length === 0) {
         return (
             <div className="bg-gray-800 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-4">
                     <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Calendrier des Dividendes</h2>
+                    <h2 className="font-semibold">Dividend Calendar</h2>
                 </div>
-                <p className="text-gray-500 text-center py-8">Aucune position</p>
+                <p className="text-gray-500 text-center py-8">No positions available</p>
             </div>
         );
     }
@@ -153,9 +194,9 @@ const DividendCalendar = ({
             <div className="bg-gray-800 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-4">
                     <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Calendrier des Dividendes</h2>
+                    <h2 className="font-semibold">Dividend Calendar</h2>
                 </div>
-                <p className="text-gray-500 text-center py-8">Chargement des données...</p>
+                <p className="text-gray-500 text-center py-8">Loading dividend data...</p>
             </div>
         );
     }
@@ -165,7 +206,7 @@ const DividendCalendar = ({
             <div className="bg-gray-800 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-4">
                     <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Calendrier des Dividendes</h2>
+                    <h2 className="font-semibold">Dividend Calendar</h2>
                 </div>
                 <p className="text-red-400 text-center py-8">{error}</p>
             </div>
@@ -180,20 +221,21 @@ const DividendCalendar = ({
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Calendrier des Dividendes</h2>
+                    <h2 className="font-semibold">Dividend Calendar</h2>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <div className="text-sm bg-gray-700 px-3 py-1 rounded">
                         <span className="text-gray-400">Total {currentYear}: </span>
-                        <span className="text-orange-400 font-bold">{totalAnnual.toFixed(2)} €</span>
+                        <span className="text-orange-400 font-bold">€{totalAnnual.toFixed(2)}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentYear(currentYear - 1)}
                             className="p-1 hover:bg-gray-700 rounded"
-                            disabled={currentYear <= new Date().getFullYear() - 10}
+                            disabled={currentYear <= new Date().getFullYear() - YEAR_RANGE_LIMIT}
+                            aria-label="Previous year"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
@@ -202,6 +244,7 @@ const DividendCalendar = ({
                             onClick={() => setCurrentYear(currentYear + 1)}
                             className="p-1 hover:bg-gray-700 rounded"
                             disabled={currentYear >= new Date().getFullYear()}
+                            aria-label="Next year"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
@@ -209,41 +252,32 @@ const DividendCalendar = ({
                 </div>
             </div>
 
-            {/* Statistiques */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-gray-700/50 rounded p-3">
-                    <p className="text-xs text-gray-400">Total perçu (10 ans)</p>
-                    <p className="text-lg font-bold text-orange-400">{totalAmount.toFixed(0)} €</p>
+                    <p className="text-xs text-gray-400">Total Received (10 Years)</p>
+                    <p className="text-lg font-bold text-orange-400">€{totalAmount.toFixed(0)}</p>
                 </div>
                 <div className="bg-gray-700/50 rounded p-3">
-                    <p className="text-xs text-gray-400">Nombre de paiements</p>
+                    <p className="text-xs text-gray-400">Number of Payments</p>
                     <p className="text-lg font-bold text-blue-400">{totalPayments}</p>
                 </div>
                 <div className="bg-gray-700/50 rounded p-3">
-                    <p className="text-xs text-gray-400">Dernier paiement</p>
-                    <p className="text-lg font-bold text-green-400">
-                        {lastPaymentDate ? lastPaymentDate.toLocaleDateString("fr-FR") : "-"}
-                    </p>
+                    <p className="text-xs text-gray-400">Last Payment</p>
+                    <p className="text-lg font-bold text-green-400">{lastPaymentDate ? lastPaymentDate.toLocaleDateString(LOCALE) : "-"}</p>
                 </div>
             </div>
-
-            {/* Grille des 12 mois */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: 12 }, (_, i) => (
                     <MonthCalendar key={i} year={currentYear} month={i} events={yearEvents} />
                 ))}
             </div>
 
-            {/* Légende et détails */}
             <div className="mt-4 border-t border-gray-700 pt-4">
                 <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 mb-4">
-                    <span>Intensité du rendement:</span>
+                    <span>Yield Intensity:</span>
                     <div className="flex items-center gap-2">
-                        <div
-                            className="w-4 h-4 rounded border border-gray-400"
-                            style={{ backgroundColor: getDividendColor(0) }}
-                        />
-                        <span>Pas de paiement</span>
+                        <div className="w-4 h-4 rounded border border-gray-400" style={{ backgroundColor: getDividendColor(0) }} />
+                        <span>No payment</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded" style={{ backgroundColor: getDividendColor(2) }} />
@@ -266,35 +300,27 @@ const DividendCalendar = ({
                         <span>10%+</span>
                     </div>
                 </div>
-
-                {/* Tableau récapitulatif par ticker */}
                 <div className="overflow-x-auto">
                     <table className="w-full text-xs">
                         <thead>
                             <tr className="text-gray-400 text-left border-b border-gray-700">
                                 <th className="pb-2 pr-4">Ticker</th>
-                                <th className="pb-2 pr-4 text-right">Paiements</th>
-                                <th className="pb-2 pr-4 text-right">Premier paiement</th>
-                                <th className="pb-2 pr-4 text-right">Dernier paiement</th>
-                                <th className="pb-2 text-right">Rendement moyen</th>
+                                <th className="pb-2 pr-4 text-right">Payments</th>
+                                <th className="pb-2 pr-4 text-right">First Payment</th>
+                                <th className="pb-2 pr-4 text-right">Last Payment</th>
+                                <th className="pb-2 text-right">Average Yield</th>
                             </tr>
                         </thead>
                         <tbody>
                             {dividendData.map((div) => {
                                 const firstPayment = div.dividends.length > 0 ? new Date(div.dividends[0].date) : null;
                                 const lastPayment =
-                                    div.dividends.length > 0
-                                        ? new Date(div.dividends[div.dividends.length - 1].date)
-                                        : null;
+                                    div.dividends.length > 0 ? new Date(div.dividends[div.dividends.length - 1].date) : null;
 
-                                // Calculer le rendement moyen
-                                const yieldsWithData = div.dividends.filter(
-                                    (d: any) => d.yield !== null && d.yield !== undefined,
-                                );
+                                const yieldsWithData = div.dividends.filter((d) => d.yield !== null && d.yield !== undefined);
                                 const avgYield =
                                     yieldsWithData.length > 0
-                                        ? yieldsWithData.reduce((sum: number, d: any) => sum + (d.yield || 0), 0) /
-                                          yieldsWithData.length
+                                        ? yieldsWithData.reduce((sum, d) => sum + (d.yield || 0), 0) / yieldsWithData.length
                                         : null;
 
                                 return (
@@ -302,10 +328,10 @@ const DividendCalendar = ({
                                         <td className="py-2 pr-4 font-medium">{div.ticker}</td>
                                         <td className="py-2 pr-4 text-right">{div.dividends.length}</td>
                                         <td className="py-2 pr-4 text-right">
-                                            {firstPayment ? firstPayment.toLocaleDateString("fr-FR") : "-"}
+                                            {firstPayment ? firstPayment.toLocaleDateString(LOCALE) : "-"}
                                         </td>
                                         <td className="py-2 pr-4 text-right">
-                                            {lastPayment ? lastPayment.toLocaleDateString("fr-FR") : "-"}
+                                            {lastPayment ? lastPayment.toLocaleDateString(LOCALE) : "-"}
                                         </td>
                                         <td className="py-2 text-right text-blue-400 font-semibold">
                                             {avgYield !== null ? `${avgYield.toFixed(2)}%` : "-"}

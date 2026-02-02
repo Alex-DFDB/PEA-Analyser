@@ -2,6 +2,10 @@
 import { useState } from "react";
 import { API_URL } from "../utils/constants";
 
+/**
+ * Hook for fetching multiple stock quotes from the API
+ * @returns Object containing fetchQuotes function and loading state
+ */
 export function useQuotes() {
     const [loading, setLoading] = useState(false);
 
@@ -14,12 +18,12 @@ export function useQuotes() {
                 body: JSON.stringify({ tickers }),
             });
 
-            if (!response.ok) throw new Error("Erreur API");
+            if (!response.ok) throw new Error("API error");
 
             const quotes = await response.json();
             return quotes;
         } catch (error) {
-            console.error("Erreur récupération quotes:", error);
+            console.error("Error fetching quotes:", error);
             throw error;
         } finally {
             setLoading(false);

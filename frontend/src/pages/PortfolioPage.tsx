@@ -6,18 +6,34 @@ import PositionsTable from "../components/Positions/PositionsTable";
 import ProjectionPanel from "../components/Projection/ProjectionPanel";
 import type { Position } from "../types";
 
+/**
+ * Props for the PortfolioPage component
+ */
 interface PortfolioPageProps {
+    /** Portfolio positions */
     positions: Position[];
+    /** Function to add a new position */
     addPosition: (position: Position) => void;
+    /** Function to delete a position by ticker */
     deletePosition: (ticker: string) => void;
+    /** Function to update all positions */
     setPositions: (positions: Position[]) => void;
+    /** Function to update current prices */
     updatePrices: () => void;
+    /** Loading state for price updates */
     loading: boolean;
+    /** Function to fetch historical price data */
     fetchHistoricalData: (tickers: string[]) => Promise<void>;
+    /** Historical price data by ticker */
     historicalData: { [ticker: string]: any[] };
+    /** Historical returns (CAGR) by ticker */
     historicalReturns: { [ticker: string]: number };
 }
 
+/**
+ * Portfolio page component displaying all portfolio views and analytics
+ * @returns Page with summary cards, charts, positions table, and projections
+ */
 const PortfolioPage = ({
     positions,
     addPosition,

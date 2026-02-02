@@ -1,20 +1,21 @@
 // pages/HomePage.tsx
 import { Link } from "react-router-dom";
-import { BarChart3, Calendar, TrendingUp, Wallet } from "lucide-react";
+import { BarChart3, Calendar, Wallet } from "lucide-react";
 
+/**
+ * Home page component displaying welcome message and navigation cards
+ * @returns Landing page with links to Portfolio and Dividends sections
+ */
 const HomePage = () => {
     return (
         <div className="max-w-4xl mx-auto">
-            {/* Hero Section */}
             <div className="text-center mb-12">
                 <div className="flex justify-center mb-6">
                     <Wallet className="w-20 h-20 text-blue-400" />
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">Bienvenue sur PEA Tracker</h1>
-                <p className="text-xl text-gray-400">Suivez et analysez votre portefeuille boursier en temps réel</p>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">Welcome to PEA Tracker</h1>
+                <p className="text-xl text-gray-400">Track and analyze your investment portfolio in real-time</p>
             </div>
-
-            {/* Feature Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 <Link
                     to="/portfolio"
@@ -27,20 +28,20 @@ const HomePage = () => {
                         <h2 className="text-2xl font-bold">Portfolio</h2>
                     </div>
                     <p className="text-gray-400">
-                        Visualisez vos positions, performances historiques et projections de croissance
+                        View your positions, historical performance, and growth projections
                     </p>
                     <ul className="mt-4 space-y-2 text-sm text-gray-300">
                         <li className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-                            Suivi en temps réel
+                            Real-time tracking
                         </li>
                         <li className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-                            Graphiques de performance
+                            Performance charts
                         </li>
                         <li className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-                            Projections futures
+                            Future projections
                         </li>
                     </ul>
                 </Link>
@@ -53,21 +54,21 @@ const HomePage = () => {
                         <div className="p-3 bg-orange-600 rounded-lg">
                             <Calendar className="w-8 h-8" />
                         </div>
-                        <h2 className="text-2xl font-bold">Dividendes</h2>
+                        <h2 className="text-2xl font-bold">Dividends</h2>
                     </div>
-                    <p className="text-gray-400">Calendrier complet de vos dividendes et statistiques détaillées</p>
+                    <p className="text-gray-400">Complete calendar of your dividends and detailed statistics</p>
                     <ul className="mt-4 space-y-2 text-sm text-gray-300">
                         <li className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-orange-400 rounded-full" />
-                            Calendrier annuel
+                            Annual calendar
                         </li>
                         <li className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-orange-400 rounded-full" />
-                            Historique 10 ans
+                            10-year history
                         </li>
                         <li className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-orange-400 rounded-full" />
-                            Rendements moyens
+                            Average yields
                         </li>
                     </ul>
                 </Link>

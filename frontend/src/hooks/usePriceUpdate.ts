@@ -4,6 +4,13 @@ import { useState } from "react";
 import type { Position } from "../types";
 import { API_URL } from "../utils/constants";
 
+/**
+ * Hook for updating current prices and dividend yields for positions
+ * @param positions Current array of positions
+ * @param setPositions Function to update positions state
+ * @param fetchHistoricalData Function to fetch historical data after price update
+ * @returns Object containing updatePrices function and loading state
+ */
 export function usePriceUpdate(
     positions: Position[],
     setPositions: (positions: Position[]) => void,
@@ -23,7 +30,7 @@ export function usePriceUpdate(
                 body: JSON.stringify({ tickers }),
             });
 
-            if (!response.ok) throw new Error("Erreur API");
+            if (!response.ok) throw new Error("API error");
 
             const data = await response.json();
 
@@ -42,7 +49,7 @@ export function usePriceUpdate(
             setPositions(updatedPositions);
             await fetchHistoricalData(tickers);
         } catch (error) {
-            alert("Erreur lors de la mise à jour des prix. Vérifiez que le serveur FastAPI est lancé.");
+            alert("Error updating prices. Please verify that the FastAPI server is running.");
         } finally {
             setLoading(false);
         }

@@ -1,4 +1,3 @@
-// components/Charts/AllocationPieChart.tsx
 import { PieChart as RechartsPie, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { PieChart } from "lucide-react";
 
@@ -6,6 +5,10 @@ import type { Position } from "../../types";
 import { calcValue } from "../../utils/calculations";
 import { getPositionColor } from "../../utils/colors";
 
+/**
+ * AllocationPieChart component displays portfolio allocation as a pie chart
+ * @param positions - Array of portfolio positions to visualize
+ */
 const AllocationPieChart = ({ positions }: { positions: Position[] }) => {
     if (positions.length === 0) return null;
 
@@ -15,7 +18,7 @@ const AllocationPieChart = ({ positions }: { positions: Position[] }) => {
         <div className="bg-gray-800 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-4">
                 <PieChart className="w-5 h-5 text-blue-400" />
-                <h2 className="font-semibold">Allocation</h2>
+                <h2 className="font-semibold">Portfolio Allocation</h2>
             </div>
             <ResponsiveContainer width="100%" height={300}>
                 <RechartsPie>
@@ -24,7 +27,7 @@ const AllocationPieChart = ({ positions }: { positions: Position[] }) => {
                             <Cell key={p.ticker} fill={getPositionColor(p, i)} />
                         ))}
                     </Pie>
-                    <Tooltip formatter={(v) => `${Number(v).toFixed(2)} €`} />
+                    <Tooltip formatter={(v) => `€${Number(v).toFixed(2)}`} />
                 </RechartsPie>
             </ResponsiveContainer>
             <div className="flex flex-wrap gap-2 mt-2">

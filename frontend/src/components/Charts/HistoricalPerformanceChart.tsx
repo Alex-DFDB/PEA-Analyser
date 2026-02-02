@@ -1,11 +1,15 @@
-// components/Charts/HistoricalPerformanceChart.tsx
-// components/Charts/HistoricalPerformanceChart.tsx
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from "recharts";
 import { TrendingUp } from "lucide-react";
 
 import type { Position } from "../../types";
 import { getPositionColor } from "../../utils/colors";
 
+/**
+ * HistoricalPerformanceChart displays the historical performance of positions over 5 years
+ * Each line shows the percentage change relative to the first data point
+ * @param positions - Array of portfolio positions
+ * @param historicalData - Historical price data for each ticker
+ */
 const HistoricalPerformanceChart = ({
     positions,
     historicalData,
@@ -15,9 +19,14 @@ const HistoricalPerformanceChart = ({
 }) => {
     if (positions.length === 0) return null;
 
+    /**
+     * Prepares historical data for the chart by normalizing prices to percentage changes
+     * @returns Array of data points with date and percentage changes for each position
+     */
     const prepareHistoricalChartData = () => {
         if (Object.keys(historicalData).length === 0) return [];
 
+        // Collect all unique dates from all positions
         const allDates = new Set<string>();
         Object.values(historicalData).forEach((data) => {
             data.forEach((point) => allDates.add(point.Date));
@@ -25,6 +34,7 @@ const HistoricalPerformanceChart = ({
 
         const sortedDates = Array.from(allDates).sort();
 
+        // Calculate percentage change for each position at each date
         return sortedDates.map((date) => {
             const dataPoint: any = { date };
 
@@ -49,7 +59,7 @@ const HistoricalPerformanceChart = ({
         <div className="bg-gray-800 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="w-5 h-5 text-blue-400" />
-                <h2 className="font-semibold">Performance historique (5 ans)</h2>
+                <h2 className="font-semibold">Historical Performance (5 Years)</h2>
             </div>
             {historicalChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
@@ -64,7 +74,7 @@ const HistoricalPerformanceChart = ({
                         <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} stroke="#9ca3af" fontSize={12} />
                         <Tooltip
                             formatter={(v: any) => `${v.toFixed(2)}%`}
-                            labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                            labelFormatter={(date) => new Date(date).toLocaleDateString("en-US")}
                         />
                         <Legend />
                         {positions.map((p, i) => (
@@ -82,7 +92,7 @@ const HistoricalPerformanceChart = ({
                 </ResponsiveContainer>
             ) : (
                 <p className="text-gray-500 text-center py-8">
-                    Cliquez sur "Actualiser" pour charger les données historiques
+                    Click "Refresh" to load historical data
                 </p>
             )}
         </div>

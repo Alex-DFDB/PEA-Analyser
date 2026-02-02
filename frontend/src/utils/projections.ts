@@ -1,17 +1,30 @@
 // utils/projections.ts
 import type { Position } from "../types/index";
 
+/**
+ * Calculate Compound Annual Growth Rate (CAGR) from historical price data
+ * @param historicalData Array of historical price data with Close prices
+ * @returns CAGR as a decimal (e.g., 0.05 for 5% annual growth)
+ */
 export const calculateHistoricalReturn = (historicalData: any[]) => {
     if (!historicalData || historicalData.length < 2) return 0;
 
     const startPrice = historicalData[0].Close;
     const endPrice = historicalData[historicalData.length - 1].Close;
-    const years = historicalData.length / 12;
+    const years = historicalData.length / 12; // Assumes monthly data
 
     const cagr = Math.pow(endPrice / startPrice, 1 / years) - 1;
     return cagr;
 };
 
+/**
+ * Calculate portfolio value projections over time
+ * @param positions Array of portfolio positions
+ * @param historicalReturns Map of ticker symbols to their historical annual returns
+ * @param years Number of years to project into the future
+ * @param detailed If true, returns per-position breakdown; if false, returns aggregated totals
+ * @returns Array of projection data points, either detailed by position or aggregated
+ */
 export const calculateProjection = (
     positions: Position[],
     historicalReturns: { [ticker: string]: number },
