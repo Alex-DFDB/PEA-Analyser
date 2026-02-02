@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker inspect:*)",
+      "Bash(.venvScriptspip.exe install -r backendrequirements.txt)",
+      "Bash(\".venv/Scripts/pip.exe\" install -r backend/requirements.txt)"
+    ]
+  }
+}

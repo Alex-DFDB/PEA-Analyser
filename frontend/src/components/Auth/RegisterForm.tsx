@@ -1,16 +1,16 @@
 /**
  * Registration form component.
  */
-import { useState, FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../auth/AuthContext';
+import { useState, type FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
 
 export const RegisterForm = () => {
-    const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
+    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
     const { register } = useAuth();
@@ -18,17 +18,17 @@ export const RegisterForm = () => {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setError('');
+        setError("");
 
         // Validate passwords match
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            setError("Passwords do not match");
             return;
         }
 
         // Validate password length
         if (password.length < 8) {
-            setError('Password must be at least 8 characters long');
+            setError("Password must be at least 8 characters long");
             return;
         }
 
@@ -36,9 +36,9 @@ export const RegisterForm = () => {
 
         try {
             await register(email, username, password);
-            navigate('/portfolio');
+            navigate("/portfolio");
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+            setError(err.response?.data?.detail || "Registration failed. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -46,11 +46,7 @@ export const RegisterForm = () => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-                <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded">
-                    {error}
-                </div>
-            )}
+            {error && <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded">{error}</div>}
 
             <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-1">
@@ -120,11 +116,11 @@ export const RegisterForm = () => {
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed py-2 rounded font-medium"
             >
-                {loading ? 'Creating account...' : 'Register'}
+                {loading ? "Creating account..." : "Register"}
             </button>
 
             <p className="text-center text-sm text-gray-400">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <Link to="/login" className="text-blue-500 hover:text-blue-400">
                     Login here
                 </Link>

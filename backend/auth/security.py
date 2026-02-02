@@ -1,6 +1,7 @@
 """
 Security utilities for password hashing and JWT token management.
 """
+import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
@@ -14,7 +15,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
     """
-    Hash a password using bcrypt.
+    Hash a password using bcrypt with SHA256 pre-hashing.
+
+    Pre-hashes with SHA256 to handle bcrypt's 72-byte limitation
+    while maintaining security for longer passwords.
 
     Args:
         password: Plain text password
@@ -22,12 +26,16 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password
     """
-    return pwd_context.hash(password)
+    # Pre-hash with SHA256 to handle bcrypt's 72-byte limit
+    password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return pwd_context.hash(password_hash)
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def verify_password(password: str, hashed_password: str) -> bool:
     """
     Verify a password against its hash.
+
+    Pre-hashes with SHA256 to match the hashing process.
 
     Args:
         plain_password: Plain text password to verify
@@ -36,7 +44,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if password matches, False otherwise
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    # Pre-hash with SHA256 to match the hashing process
+    password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return pwd_context.verify(password_hash, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

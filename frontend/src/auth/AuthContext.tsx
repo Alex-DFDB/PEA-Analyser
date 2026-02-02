@@ -1,16 +1,16 @@
 /**
  * Authentication context provider for managing global auth state.
  */
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import * as authApi from '../api/auth';
-import type { AuthContextType, User } from './types';
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import * as authApi from "../api/auth";
+import type { AuthContextType, User } from "./types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
 };
@@ -26,14 +26,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Check if user is logged in on mount
     useEffect(() => {
         const checkAuth = async () => {
-            const token = localStorage.getItem('access_token');
+            const token = localStorage.getItem("access_token");
             if (token) {
                 try {
                     const userData = await authApi.getCurrentUser();
                     setUser(userData);
                 } catch (error) {
                     // Token is invalid, remove it
-                    localStorage.removeItem('access_token');
+                    localStorage.removeItem("access_token");
                 }
             }
             setLoading(false);
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const login = async (username: string, password: string) => {
         const tokenResponse = await authApi.login({ username, password });
-        localStorage.setItem('access_token', tokenResponse.access_token);
+        localStorage.setItem("access_token", tokenResponse.access_token);
 
         // Fetch user data
         const userData = await authApi.getCurrentUser();
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const register = async (email: string, username: string, password: string) => {
         const tokenResponse = await authApi.register({ email, username, password });
-        localStorage.setItem('access_token', tokenResponse.access_token);
+        localStorage.setItem("access_token", tokenResponse.access_token);
 
         // Fetch user data
         const userData = await authApi.getCurrentUser();
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } catch (error) {
             // Ignore errors, just clear local state
         } finally {
-            localStorage.removeItem('access_token');
+            localStorage.removeItem("access_token");
             setUser(null);
         }
     };

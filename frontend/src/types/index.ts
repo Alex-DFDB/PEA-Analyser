@@ -21,7 +21,7 @@ export type User = {
  */
 export type Position = {
     /** Database ID */
-    id: number;
+    id?: number;
     /** Stock ticker symbol (e.g., "AAPL", "GOOGL") */
     ticker: string;
     /** Company or stock name */
