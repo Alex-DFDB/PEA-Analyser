@@ -1,5 +1,3 @@
-// components/Summary/SummaryCard.tsx
-
 const SummaryCard = ({ label, value, trend }: { label: string; value: React.ReactNode; trend?: React.ReactNode }) => {
     return (
         <div className="bg-gray-800 rounded-lg p-4">
