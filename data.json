@@ -1,77 +1,66 @@
 [
     {
         "ticker": "BYNN",
-        "name": "Rubis",
         "quantity": 70,
         "buyPrice": 28.22,
         "color": "#ef4444"
     },
     {
         "ticker": "65C",
-        "name": "Coface",
         "quantity": 130,
         "buyPrice": 15.89,
         "color": "#3b82f6"
     },
     {
         "ticker": "GZF",
-        "name": "Engie",
         "quantity": 70,
         "buyPrice": 19.24,
         "color": "#10b981"
     },
     {
         "ticker": "8TI",
-        "name": "Stellantis",
         "quantity": 170,
         "buyPrice": 9.17,
         "color": "#8b5cf6"
     },
     {
         "ticker": "MMT",
-        "name": "Métropole Télévision",
         "quantity": 80,
         "buyPrice": 13.03,
         "color": "#f59e0b"
     },
     {
         "ticker": "FTE",
-        "name": "Orange",
         "quantity": 60,
         "buyPrice": 13.37,
         "color": "#ff6b00"
     },
     {
         "ticker": "XCA",
-        "name": "Crédit Agricole",
         "quantity": 50,
         "buyPrice": 16.43,
         "color": "#22c55e"
     },
     {
         "ticker": "ENI",
-        "name": "Eni",
         "quantity": 50,
         "buyPrice": 14.72,
         "color": "#ec4899"
     },
     {
         "ticker": "SJ7",
-        "name": "Sodexo",
         "quantity": 20,
         "buyPrice": 44.68,
         "color": "#06b6d4"
     },
     {
         "ticker": "FSE",
-        "name": "Télévision Française 1",
         "quantity": 30,
         "buyPrice": 8.29,
         "color": "#0ea5e9"
     },
     {
         "ticker": "CAR",
-        "name": "Carrefour",
         "quantity": 35,
         "buyPrice": 13.83,
         "color": "#00387b"

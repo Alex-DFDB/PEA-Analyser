@@ -62,7 +62,7 @@ const ProjectionPanel = ({
                                 stroke={getPositionColor(p, i)}
                                 strokeWidth={2}
                                 dot={false}
-                                name={p.ticker}
+                                name={p.name}
                             />
                         ))
                     ) : (

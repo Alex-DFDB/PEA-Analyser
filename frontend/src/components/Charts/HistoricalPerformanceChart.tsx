@@ -3,6 +3,7 @@ import { TrendingUp } from "lucide-react";
 
 import type { Position } from "../../types";
 import { getPositionColor } from "../../utils/colors";
+import { formatDate } from "../../utils/date";
 
 /**
  * HistoricalPerformanceChart displays the historical performance of positions over 5 years
@@ -62,7 +63,7 @@ const HistoricalPerformanceChart = ({
                 <h2 className="font-semibold">Historical Performance (5 Years)</h2>
             </div>
             {historicalChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={historicalChartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis
@@ -72,10 +73,7 @@ const HistoricalPerformanceChart = ({
                             fontSize={12}
                         />
                         <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} stroke="#9ca3af" fontSize={12} />
-                        <Tooltip
-                            formatter={(v: any) => `${v.toFixed(2)}%`}
-                            labelFormatter={(date) => new Date(date).toLocaleDateString("en-US")}
-                        />
+                        <Tooltip formatter={(v: any) => `${v.toFixed(2)}%`} labelFormatter={(date) => formatDate(new Date(date))} />
                         <Legend />
                         {positions.map((p, i) => (
                             <Line
@@ -85,15 +83,13 @@ const HistoricalPerformanceChart = ({
                                 stroke={getPositionColor(p, i)}
                                 strokeWidth={2}
                                 dot={false}
-                                name={p.ticker}
+                                name={p.name}
                             />
                         ))}
                     </LineChart>
                 </ResponsiveContainer>
             ) : (
-                <p className="text-gray-500 text-center py-8">
-                    Click "Refresh" to load historical data
-                </p>
+                <p className="text-gray-500 text-center py-8">Click "Refresh" to load historical data</p>
             )}
         </div>
     );

@@ -2,6 +2,7 @@ import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import type { Position } from "../../types";
 import type { DividendEvent } from "../../hooks/useDividends";
+import { formatDate } from "../../utils/date";
 
 /**
  * Color scheme constants for dividend yield visualization
@@ -143,7 +144,7 @@ const MonthCalendar = ({ year, month, events }: MonthCalendarProps) => {
                             title={
                                 dayEvents.length > 0
                                     ? dayEvents
-                                          .map((e) => `${e.ticker}: ${e.yield ? `${e.yield.toFixed(2)}%` : `${e.amount.toFixed(2)}€`}`)
+                                          .map((e) => `${e.name}: ${e.yield ? `${e.yield.toFixed(2)}%` : `${e.amount.toFixed(2)}€`}`)
                                           .join("\n")
                                     : ""
                             }
@@ -263,7 +264,7 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
                 </div>
                 <div className="bg-gray-700/50 rounded p-3">
                     <p className="text-xs text-gray-400">Last Payment</p>
-                    <p className="text-lg font-bold text-green-400">{lastPaymentDate ? lastPaymentDate.toLocaleDateString(LOCALE) : "-"}</p>
+                    <p className="text-lg font-bold text-green-400">{lastPaymentDate ? formatDate(lastPaymentDate) : "-"}</p>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -304,7 +305,7 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
                     <table className="w-full text-xs">
                         <thead>
                             <tr className="text-gray-400 text-left border-b border-gray-700">
-                                <th className="pb-2 pr-4">Ticker</th>
+                                <th className="pb-2 pr-4">Name</th>
                                 <th className="pb-2 pr-4 text-right">Payments</th>
                                 <th className="pb-2 pr-4 text-right">First Payment</th>
                                 <th className="pb-2 pr-4 text-right">Last Payment</th>
@@ -325,13 +326,13 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
 
                                 return (
                                     <tr key={div.ticker} className="border-b border-gray-700/50">
-                                        <td className="py-2 pr-4 font-medium">{div.ticker}</td>
+                                        <td className="py-2 pr-4 font-medium">{positions.find(p => p.ticker === div.ticker)?.name || div.ticker}</td>
                                         <td className="py-2 pr-4 text-right">{div.dividends.length}</td>
                                         <td className="py-2 pr-4 text-right">
-                                            {firstPayment ? firstPayment.toLocaleDateString(LOCALE) : "-"}
+                                            {firstPayment ? formatDate(firstPayment) : "-"}
                                         </td>
                                         <td className="py-2 pr-4 text-right">
-                                            {lastPayment ? lastPayment.toLocaleDateString(LOCALE) : "-"}
+                                            {lastPayment ? formatDate(lastPayment) : "-"}
                                         </td>
                                         <td className="py-2 text-right text-blue-400 font-semibold">
                                             {avgYield !== null ? `${avgYield.toFixed(2)}%` : "-"}

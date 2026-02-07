@@ -15,7 +15,8 @@ const PositionRow = ({ position, onDelete }: { position: Position; onDelete: () 
 
     return (
         <tr className="border-t border-gray-700">
-            <td className="py-2 font-medium">{position.ticker}</td>
+            <td className="py-2 font-medium">{position.name}</td>
+            <td className="text-gray-400">{position.ticker}</td>
             <td>{position.quantity}</td>
             <td>€{position.buyPrice.toFixed(2)}</td>
             <td>€{position.currentPrice.toFixed(2)}</td>
@@ -23,7 +24,6 @@ const PositionRow = ({ position, onDelete }: { position: Position; onDelete: () 
             <td className={pv >= 0 ? "text-green-400" : "text-red-400"}>
                 {pv >= 0 ? "+" : ""}€{pv.toFixed(2)} ({pvPct.toFixed(1)}%)
             </td>
-            <td>{position.dividendYield ? `${position.dividendYield}%` : "-"}</td>
             <td>
                 <button onClick={onDelete} className="text-red-400 hover:text-red-300 cursor-pointer">
                     <Trash2 className="w-4 h-4" />
