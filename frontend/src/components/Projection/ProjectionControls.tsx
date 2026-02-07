@@ -33,7 +33,7 @@ const ProjectionControls = ({
             </div>
             <button
                 onClick={onViewToggle}
-                className={`px-3 py-1 rounded text-sm ${detailedView ? "bg-blue-600" : "bg-gray-600"} hover:opacity-80`}
+                className={`px-3 py-1 rounded text-sm ${detailedView ? "bg-blue-600" : "bg-gray-600"} hover:opacity-80 cursor-pointer`}
             >
                 {detailedView ? "Detailed View" : "Total View"}
             </button>

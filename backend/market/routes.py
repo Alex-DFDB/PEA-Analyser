@@ -19,7 +19,7 @@ TEN_YEAR_PERIOD = "10y"
 MONTHLY_INTERVAL = "1mo"
 DAILY_INTERVAL = "1d"
 
-router = APIRouter(prefix="/market", tags=["Market Data"])
+router = APIRouter(prefix="/api", tags=["Market Data"])
 
 
 def normalize_ticker(ticker: str) -> str:

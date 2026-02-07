@@ -8,14 +8,15 @@ import { BarChart3, Calendar, Wallet } from "lucide-react";
  */
 const HomePage = () => {
     return (
-        <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-                <div className="flex justify-center mb-6">
-                    <Wallet className="w-20 h-20 text-blue-400" />
+        <div className="min-h-screen bg-gray-900 text-white p-6">
+            <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-12">
+                    <div className="flex justify-center mb-6">
+                        <Wallet className="w-20 h-20 text-blue-400" />
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4">Welcome to PEA Tracker</h1>
+                    <p className="text-xl text-gray-400">Track and analyze your investment portfolio in real-time</p>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">Welcome to PEA Tracker</h1>
-                <p className="text-xl text-gray-400">Track and analyze your investment portfolio in real-time</p>
-            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 <Link
                     to="/portfolio"
@@ -72,6 +73,7 @@ const HomePage = () => {
                         </li>
                     </ul>
                 </Link>
+            </div>
             </div>
         </div>
     );

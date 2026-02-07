@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AuthProvider } from "./auth/AuthContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Navbar from "./components/Navigation/Navbar";
+import Header from "./components/Navigation/Header";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -48,6 +49,7 @@ function AppContent() {
                             <div className="min-h-screen bg-gray-900 text-white p-6">
                                 <Navbar />
                                 <main className="ml-[280px]">
+                                    <Header />
                                     <div className="w-full">
                                         <PortfolioPage
                                             positions={positions}
@@ -71,6 +73,7 @@ function AppContent() {
                             <div className="min-h-screen bg-gray-900 text-white p-6">
                                 <Navbar />
                                 <main className="ml-[280px]">
+                                    <Header />
                                     <div className="w-full">
                                         <DividendsPage positions={positions} dividendState={dividendState} />
                                     </div>

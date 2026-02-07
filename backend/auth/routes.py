@@ -1,6 +1,7 @@
 """
 Authentication API routes.
 """
+import uuid
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
@@ -36,6 +37,7 @@ async def register(user_data: UserRegister, response: Response):
 
         # Create user
         user = User.create(
+            id_user=str(uuid.uuid4()),
             email=user_data.email,
             username=user_data.username,
             hashed_password=hashed_password,

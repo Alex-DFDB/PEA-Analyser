@@ -82,7 +82,7 @@ const PositionForm = ({
                 />
                 <button
                     onClick={() => setForm({ ...form, color: "" })}
-                    className="text-xs text-gray-400 hover:text-white"
+                    className="text-xs text-gray-400 hover:text-white cursor-pointer"
                     disabled={loading}
                 >
                     Auto
@@ -91,7 +91,7 @@ const PositionForm = ({
             <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="col-span-2 md:col-span-5 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded py-2 text-sm"
+                className="col-span-2 md:col-span-5 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded py-2 text-sm cursor-pointer"
             >
                 {loading ? "Adding Position..." : "Add Position"}
             </button>

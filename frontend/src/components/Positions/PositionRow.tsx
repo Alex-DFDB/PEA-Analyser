@@ -25,7 +25,7 @@ const PositionRow = ({ position, onDelete }: { position: Position; onDelete: () 
             </td>
             <td>{position.dividendYield ? `${position.dividendYield}%` : "-"}</td>
             <td>
-                <button onClick={onDelete} className="text-red-400 hover:text-red-300">
+                <button onClick={onDelete} className="text-red-400 hover:text-red-300 cursor-pointer">
                     <Trash2 className="w-4 h-4" />
                 </button>
             </td>

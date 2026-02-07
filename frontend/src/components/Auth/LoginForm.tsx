@@ -66,7 +66,7 @@ export const LoginForm = () => {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed py-2 rounded font-medium"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed py-2 rounded font-medium cursor-pointer"
             >
                 {loading ? "Logging in..." : "Login"}
             </button>

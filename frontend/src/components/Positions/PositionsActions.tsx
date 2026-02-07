@@ -22,14 +22,14 @@ const PositionsActions = ({
             <button
                 onClick={onRefresh}
                 disabled={loading || !hasPositions}
-                className="flex items-center gap-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-3 py-1.5 rounded text-sm"
+                className="flex items-center gap-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-3 py-1.5 rounded text-sm cursor-pointer"
             >
                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 {loading ? "Refreshing..." : "Refresh Prices"}
             </button>
             <button
                 onClick={onAdd}
-                className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-sm"
+                className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-sm cursor-pointer"
             >
                 <Plus className="w-4 h-4" /> Add
             </button>
