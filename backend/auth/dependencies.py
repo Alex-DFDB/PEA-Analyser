@@ -39,14 +39,14 @@ async def get_current_user(
     if payload is None:
         raise credentials_exception
 
-    # Extract user_id from token
-    user_id: int = payload.get("sub")
-    if user_id is None:
+    # Extract id_user from token
+    id_user: str = payload.get("sub")
+    if id_user is None:
         raise credentials_exception
 
     # Get user from database
     try:
-        user = User.get_by_id(user_id)
+        user = User.get_by_id(id_user)
     except User.DoesNotExist:
         raise credentials_exception
 

@@ -19,7 +19,7 @@ class Position(Model):
     """Portfolio position model."""
 
     id = AutoField(primary_key=True)
-    user = ForeignKeyField(User, backref='positions', on_delete='CASCADE')
+    user = ForeignKeyField(User, column_name='id_user', backref='positions', on_delete='CASCADE')
     ticker = CharField(max_length=20, index=True)
     name = CharField(max_length=255)
     quantity = DecimalField(max_digits=10, decimal_places=4)

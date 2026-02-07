@@ -39,13 +39,13 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """Schema for token payload data."""
 
-    user_id: int
+    id_user: str
 
 
 class UserResponse(BaseModel):
     """Schema for user information response."""
 
-    id: int
+    id: str
     email: str
     username: str
     is_active: bool

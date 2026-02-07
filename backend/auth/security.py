@@ -54,7 +54,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     Create a JWT access token.
 
     Args:
-        data: Data to encode in the token (typically {"sub": user_id})
+        data: Data to encode in the token (typically {"sub": id_user})
         expires_delta: Optional custom expiration time
 
     Returns:

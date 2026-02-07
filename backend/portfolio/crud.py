@@ -9,38 +9,38 @@ from portfolio.models import Position
 from auth.models import User
 
 
-def get_user_positions(user_id: int) -> List[Position]:
+def get_user_positions(id_user: str) -> List[Position]:
     """
     Get all positions for a specific user.
 
     Args:
-        user_id: User ID
+        id_user: User ID
 
     Returns:
         List of positions
     """
-    return list(Position.select().where(Position.user == user_id).order_by(Position.ticker))
+    return list(Position.select().where(Position.user == id_user).order_by(Position.ticker))
 
 
-def get_position(position_id: int, user_id: int) -> Optional[Position]:
+def get_position(position_id: int, id_user: str) -> Optional[Position]:
     """
     Get a specific position by ID for a user.
 
     Args:
         position_id: Position ID
-        user_id: User ID
+        id_user: User ID
 
     Returns:
         Position object or None if not found
     """
     try:
-        return Position.get((Position.id == position_id) & (Position.user == user_id))
+        return Position.get((Position.id == position_id) & (Position.user == id_user))
     except DoesNotExist:
         return None
 
 
 def create_position(
-    user_id: int,
+    id_user: str,
     ticker: str,
     name: str,
     quantity: Decimal,
@@ -51,7 +51,7 @@ def create_position(
     Create a new position for a user.
 
     Args:
-        user_id: User ID
+        id_user: User ID
         ticker: Stock ticker
         name: Company name
         quantity: Number of shares
@@ -65,7 +65,7 @@ def create_position(
         IntegrityError: If position with same ticker already exists for user
     """
     position = Position.create(
-        user=user_id,
+        user=id_user,
         ticker=ticker.upper(),
         name=name,
         quantity=quantity,
@@ -79,7 +79,7 @@ def create_position(
 
 def update_position(
     position_id: int,
-    user_id: int,
+    id_user: str,
     name: Optional[str] = None,
     quantity: Optional[Decimal] = None,
     buy_price: Optional[Decimal] = None,
@@ -90,7 +90,7 @@ def update_position(
 
     Args:
         position_id: Position ID
-        user_id: User ID
+        id_user: User ID
         name: New company name (optional)
         quantity: New quantity (optional)
         buy_price: New buy price (optional)
@@ -99,7 +99,7 @@ def update_position(
     Returns:
         Updated position or None if not found
     """
-    position = get_position(position_id, user_id)
+    position = get_position(position_id, id_user)
     if not position:
         return None
 
@@ -119,18 +119,18 @@ def update_position(
     return position
 
 
-def delete_position(position_id: int, user_id: int) -> bool:
+def delete_position(position_id: int, id_user: str) -> bool:
     """
     Delete a position.
 
     Args:
         position_id: Position ID
-        user_id: User ID
+        id_user: User ID
 
     Returns:
         True if deleted, False if not found
     """
-    position = get_position(position_id, user_id)
+    position = get_position(position_id, id_user)
     if not position:
         return False
 
@@ -139,7 +139,7 @@ def delete_position(position_id: int, user_id: int) -> bool:
 
 
 def upsert_position(
-    user_id: int,
+    id_user: str,
     ticker: str,
     name: str,
     quantity: Decimal,
@@ -150,7 +150,7 @@ def upsert_position(
     Create or update a position (used for bulk import).
 
     Args:
-        user_id: User ID
+        id_user: User ID
         ticker: Stock ticker
         name: Company name
         quantity: Number of shares
@@ -162,7 +162,7 @@ def upsert_position(
     """
     try:
         # Try to find existing position
-        position = Position.get((Position.user == user_id) & (Position.ticker == ticker.upper()))
+        position = Position.get((Position.user == id_user) & (Position.ticker == ticker.upper()))
 
         # Update existing position
         position.name = name
@@ -176,4 +176,4 @@ def upsert_position(
         return position
     except DoesNotExist:
         # Create new position
-        return create_position(user_id, ticker, name, quantity, buy_price, color)
+        return create_position(id_user, ticker, name, quantity, buy_price, color)

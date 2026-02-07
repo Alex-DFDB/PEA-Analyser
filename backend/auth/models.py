@@ -4,7 +4,6 @@ User authentication models.
 from datetime import datetime
 from peewee import (
     Model,
-    AutoField,
     CharField,
     BooleanField,
     DateTimeField,
@@ -15,7 +14,7 @@ from database import db
 class User(Model):
     """User model for authentication."""
 
-    id = AutoField(primary_key=True)
+    id_user = CharField(primary_key=True, max_length=255)
     email = CharField(unique=True, max_length=255, index=True)
     username = CharField(unique=True, max_length=50, index=True)
     hashed_password = CharField(max_length=255)

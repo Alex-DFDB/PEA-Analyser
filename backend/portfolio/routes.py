@@ -30,7 +30,7 @@ async def list_positions(current_user: User = Depends(get_current_user)):
     Returns:
         List of positions
     """
-    positions = crud.get_user_positions(current_user.id)
+    positions = crud.get_user_positions(current_user.id_user)
     return [PositionResponse.model_validate(p) for p in positions]
 
 
@@ -54,7 +54,7 @@ async def create_position(
     """
     try:
         position = crud.create_position(
-            user_id=current_user.id,
+            id_user=current_user.id_user,
             ticker=position_data.ticker,
             name=position_data.name,
             quantity=position_data.quantity,
@@ -87,7 +87,7 @@ async def get_position(
     Raises:
         HTTPException: If position not found
     """
-    position = crud.get_position(position_id, current_user.id)
+    position = crud.get_position(position_id, current_user.id_user)
     if not position:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -118,7 +118,7 @@ async def update_position(
     """
     position = crud.update_position(
         position_id=position_id,
-        user_id=current_user.id,
+        id_user=current_user.id_user,
         name=position_data.name,
         quantity=position_data.quantity,
         buy_price=position_data.buy_price,
@@ -147,7 +147,7 @@ async def delete_position(
     Raises:
         HTTPException: If position not found
     """
-    success = crud.delete_position(position_id, current_user.id)
+    success = crud.delete_position(position_id, current_user.id_user)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -175,7 +175,7 @@ async def bulk_import_positions(
 
     for pos_data in import_data.positions:
         position = crud.upsert_position(
-            user_id=current_user.id,
+            id_user=current_user.id_user,
             ticker=pos_data.ticker,
             name=pos_data.name or pos_data.ticker,
             quantity=pos_data.quantity,
@@ -198,7 +198,7 @@ async def export_positions(current_user: User = Depends(get_current_user)):
     Returns:
         List of positions in JSON-compatible format
     """
-    positions = crud.get_user_positions(current_user.id)
+    positions = crud.get_user_positions(current_user.id_user)
 
     return [
         {

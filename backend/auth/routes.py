@@ -2,12 +2,12 @@
 Authentication API routes.
 """
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from peewee import IntegrityError
 from auth.models import User
 from auth.schemas import UserRegister, Token, UserResponse
-from auth.security import hash_password, verify_password, create_access_token, create_refresh_token
+from auth.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token
 from auth.dependencies import get_current_user
 
 
@@ -45,8 +45,8 @@ async def register(user_data: UserRegister, response: Response):
         )
 
         # Generate tokens
-        access_token = create_access_token(data={"sub": user.id})
-        refresh_token = create_refresh_token(data={"sub": user.id})
+        access_token = create_access_token(data={"sub": user.id_user})
+        refresh_token = create_refresh_token(data={"sub": user.id_user})
 
         # Set refresh token as HTTPOnly cookie
         response.set_cookie(
@@ -123,8 +123,8 @@ async def login(
         )
 
     # Generate tokens
-    access_token = create_access_token(data={"sub": user.id})
-    refresh_token = create_refresh_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": user.id_user})
+    refresh_token = create_refresh_token(data={"sub": user.id_user})
 
     # Set refresh token as HTTPOnly cookie
     response.set_cookie(
@@ -160,6 +160,84 @@ async def logout(response: Response):
     return {"message": "Successfully logged out"}
 
 
+@router.post("/refresh", response_model=Token)
+async def refresh_access_token(request: Request, response: Response):
+    """
+    Refresh access token using the refresh token from HTTPOnly cookie.
+
+    Args:
+        request: FastAPI request object (to read cookies)
+        response: FastAPI response object (to set new cookies)
+
+    Returns:
+        New access token
+
+    Raises:
+        HTTPException: If refresh token is invalid or expired
+    """
+    # Get refresh token from cookie
+    refresh_token = request.cookies.get("refresh_token")
+
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Decode and verify refresh token
+    payload = decode_token(refresh_token)
+
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Extract id_user from token
+    id_user: str = payload.get("sub")
+    if id_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Get user from database
+    try:
+        user = User.get_by_id(id_user)
+    except User.DoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Check if user is active
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive"
+        )
+
+    # Generate new tokens
+    new_access_token = create_access_token(data={"sub": user.id_user})
+    new_refresh_token = create_refresh_token(data={"sub": user.id_user})
+
+    # Set new refresh token as HTTPOnly cookie
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True,
+        secure=False,  # Set to True in production with HTTPS
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60  # 7 days
+    )
+
+    return Token(access_token=new_access_token)
+
+
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     """
@@ -172,7 +250,7 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         User information
     """
     return UserResponse(
-        id=current_user.id,
+        id=current_user.id_user,
         email=current_user.email,
         username=current_user.username,
         is_active=current_user.is_active,
