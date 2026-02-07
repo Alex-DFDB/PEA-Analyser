@@ -56,7 +56,6 @@ async def create_position(
         position = crud.create_position(
             id_user=current_user.id_user,
             ticker=position_data.ticker,
-            name=position_data.name,
             quantity=position_data.quantity,
             buy_price=position_data.buy_price,
             color=position_data.color
@@ -119,7 +118,6 @@ async def update_position(
     position = crud.update_position(
         position_id=position_id,
         id_user=current_user.id_user,
-        name=position_data.name,
         quantity=position_data.quantity,
         buy_price=position_data.buy_price,
         color=position_data.color
@@ -177,7 +175,6 @@ async def bulk_import_positions(
         position = crud.upsert_position(
             id_user=current_user.id_user,
             ticker=pos_data.ticker,
-            name=pos_data.name or pos_data.ticker,
             quantity=pos_data.quantity,
             buy_price=pos_data.buyPrice,
             color=pos_data.color
@@ -203,7 +200,6 @@ async def export_positions(current_user: User = Depends(get_current_user)):
     return [
         {
             "ticker": p.ticker,
-            "name": p.name,
             "quantity": float(p.quantity),
             "buyPrice": float(p.buy_price),
             "color": p.color

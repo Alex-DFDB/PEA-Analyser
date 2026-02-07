@@ -21,9 +21,9 @@ import { useDividends } from "./hooks/useDividends";
  * Provides routing between public and protected pages.
  */
 function AppContent() {
-    const { positions, addPosition, deletePosition, setPositions } = usePositions();
-    const { historicalReturns, historicalData, fetchHistoricalData } = useHistoricalData();
-    const { updatePrices, loading } = usePriceUpdate(positions, setPositions, fetchHistoricalData);
+    const { positions, addPosition, deletePosition, setPositions, loading: positionsLoading } = usePositions();
+    const { historicalReturns, historicalData, fetchHistoricalData, loading: historicalLoading } = useHistoricalData();
+    const { updatePrices, loading: pricesLoading } = usePriceUpdate(positions, setPositions);
     const dividendState = useDividends(positions);
 
     useEffect(() => {
@@ -31,7 +31,8 @@ function AppContent() {
             const tickers = positions.map((p) => p.ticker);
             fetchHistoricalData(tickers);
         }
-    }, [positions.length]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [positions.map(p => p.ticker).sort().join(',')]);
 
     return (
         <Router>
@@ -57,8 +58,9 @@ function AppContent() {
                                             deletePosition={deletePosition}
                                             setPositions={setPositions}
                                             updatePrices={updatePrices}
-                                            loading={loading}
-                                            fetchHistoricalData={fetchHistoricalData}
+                                            positionsLoading={positionsLoading}
+                                            pricesLoading={pricesLoading}
+                                            historicalLoading={historicalLoading}
                                             historicalData={historicalData}
                                             historicalReturns={historicalReturns}
                                         />

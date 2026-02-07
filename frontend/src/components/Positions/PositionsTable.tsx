@@ -8,6 +8,8 @@ import type { Position } from "../../types";
 import { useQuote } from "../../hooks/useQuote";
 import { useQuotes } from "../../hooks/useQuotes";
 import { generateRandomColor } from "../../utils/colors";
+import { bulkImportPositions } from "../../api/portfolio";
+import { SkeletonTableRow } from "../common/Skeleton";
 
 /**
  * PositionsTable manages the display and manipulation of portfolio positions
@@ -20,7 +22,6 @@ const PositionsTable = ({
     setPositions,
     updatePrices,
     loading,
-    fetchHistoricalData,
 }: {
     positions: Position[];
     addPosition: (position: Position) => void;
@@ -28,7 +29,6 @@ const PositionsTable = ({
     setPositions: (positions: Position[]) => void;
     updatePrices: () => void;
     loading: boolean;
-    fetchHistoricalData: (tickers: string[]) => Promise<void>;
 }) => {
     const [showForm, setShowForm] = useState(false);
     const [uploadLoading, setUploadLoading] = useState(false);
@@ -42,7 +42,6 @@ const PositionsTable = ({
      */
     const handleAddPosition = async (
         ticker: string,
-        name: string,
         quantity: number,
         buyPrice: number,
         color?: string,
@@ -52,7 +51,7 @@ const PositionsTable = ({
 
             const newPosition: Position = {
                 ticker: ticker.toUpperCase(),
-                name: quote.name || name,
+                name: quote.name,
                 quantity,
                 buyPrice,
                 currentPrice: quote.currentPrice || buyPrice,
@@ -61,14 +60,12 @@ const PositionsTable = ({
             };
 
             addPosition(newPosition);
-            await fetchHistoricalData([ticker]);
             setShowForm(false);
         } catch (error) {
             alert("Unable to fetch quote data. Position added with buy price.");
 
             const newPosition: Position = {
                 ticker: ticker.toUpperCase(),
-                name,
                 quantity,
                 buyPrice,
                 currentPrice: buyPrice,
@@ -82,7 +79,7 @@ const PositionsTable = ({
 
     /**
      * Handles JSON file upload for bulk position import
-     * Fetches current prices for all tickers and merges with existing positions
+     * Saves positions to the database and fetches current prices
      */
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -95,64 +92,58 @@ const PositionsTable = ({
             try {
                 const data = JSON.parse(event.target?.result as string);
                 if (Array.isArray(data)) {
-                    const tickers = data.map((p) => p.ticker);
+                    // Import positions to database
+                    const importedPositions = await bulkImportPositions(data);
+
+                    // Fetch quotes for all tickers
+                    const tickers = importedPositions.map((p) => p.ticker);
 
                     try {
                         const quotes = await fetchQuotes(tickers);
 
-                        const newPositions = data.map((p) => {
-                            const quote = quotes.find((q: any) => q.ticker === p.ticker.toUpperCase());
+                        // Map positions with current prices
+                        const updatedPositions = importedPositions.map((p: any) => {
+                            const quote = quotes.find((q: any) => q.ticker === p.ticker);
+                            const buyPrice = p.buy_price || p.buyPrice;
                             return {
-                                ticker: p.ticker.toUpperCase(),
+                                id: p.id,
+                                ticker: p.ticker,
                                 quantity: p.quantity,
-                                buyPrice: p.buyPrice,
-                                currentPrice: quote?.currentPrice || p.buyPrice,
+                                buyPrice: buyPrice,
+                                currentPrice: quote?.currentPrice || buyPrice,
                                 dividendYield: quote?.dividendYield,
-                                name: quote?.name || p.name || p.ticker,
-                                color: p.color || generateRandomColor(),
+                                name: quote?.name,
+                                color: p.color,
+                                created_at: p.created_at,
+                                updated_at: p.updated_at
                             };
                         });
 
-                        const updatedPositions = [...positions];
-                        newPositions.forEach((newPos) => {
-                            const existingIndex = updatedPositions.findIndex((p) => p.ticker === newPos.ticker);
-                            if (existingIndex >= 0) {
-                                updatedPositions[existingIndex] = newPos;
-                            } else {
-                                updatedPositions.push(newPos);
-                            }
-                        });
-
                         setPositions(updatedPositions);
-                        await fetchHistoricalData(tickers);
                     } catch (error) {
-                        alert("Unable to fetch prices. Positions added with buy prices.");
-                        const newPositions = data.map((p) => ({
-                            ticker: p.ticker.toUpperCase(),
-                            quantity: p.quantity,
-                            buyPrice: p.buyPrice,
-                            currentPrice: p.buyPrice,
-                            name: p.name || p.ticker,
-                            color: p.color || generateRandomColor(),
-                        }));
-
-                        const updatedPositions = [...positions];
-                        newPositions.forEach((newPos) => {
-                            const existingIndex = updatedPositions.findIndex((p) => p.ticker === newPos.ticker);
-                            if (existingIndex >= 0) {
-                                updatedPositions[existingIndex] = newPos;
-                            } else {
-                                updatedPositions.push(newPos);
-                            }
+                        console.error("Failed to fetch quotes:", error);
+                        // Map positions with buy prices as fallback
+                        const fallbackPositions = importedPositions.map((p: any) => {
+                            const buyPrice = p.buy_price || p.buyPrice;
+                            return {
+                                id: p.id,
+                                ticker: p.ticker,
+                                quantity: p.quantity,
+                                buyPrice: buyPrice,
+                                currentPrice: buyPrice,
+                                color: p.color,
+                                created_at: p.created_at,
+                                updated_at: p.updated_at
+                            };
                         });
-
-                        setPositions(updatedPositions);
-                    } finally {
-                        setUploadLoading(false);
+                        setPositions(fallbackPositions);
                     }
+
+                    setUploadLoading(false);
                 }
-            } catch {
-                alert("Invalid JSON file");
+            } catch (error) {
+                console.error("Import failed:", error);
+                alert("Failed to import positions. Please try again.");
                 setUploadLoading(false);
             }
         };
@@ -177,14 +168,34 @@ const PositionsTable = ({
                 <PositionForm onSubmit={handleAddPosition} onCancel={() => setShowForm(false)} loading={addLoading} />
             )}
 
-            {positions.length === 0 ? (
+            {loading && positions.length === 0 ? (
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="text-gray-400 text-left">
+                                <th className="pb-2">Ticker</th>
+                                <th className="pb-2">Quantity</th>
+                                <th className="pb-2">Buy Price</th>
+                                <th className="pb-2">Current Price</th>
+                                <th className="pb-2">Total Value</th>
+                                <th className="pb-2">Profit/Loss</th>
+                                <th className="pb-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {[1, 2, 3].map((i) => (
+                                <SkeletonTableRow key={i} />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : positions.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No positions yet. Click "Add" to get started.</p>
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="text-gray-400 text-left">
-                                <th className="pb-2">Name</th>
                                 <th className="pb-2">Ticker</th>
                                 <th className="pb-2">Quantity</th>
                                 <th className="pb-2">Buy Price</th>

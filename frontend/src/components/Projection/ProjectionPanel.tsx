@@ -7,6 +7,7 @@ import ProjectionControls from "./ProjectionControls";
 import { calculateTotals } from "../../utils/calculations";
 import { calculateProjection } from "../../utils/projections";
 import { getPositionColor } from "../../utils/colors";
+import { SkeletonChart } from "../common/Skeleton";
 
 /**
  * ProjectionPanel displays future value projections based on historical returns
@@ -16,9 +17,11 @@ import { getPositionColor } from "../../utils/colors";
 const ProjectionPanel = ({
     positions,
     historicalReturns,
+    loading = false,
 }: {
     positions: Position[];
     historicalReturns: { [ticker: string]: number };
+    loading?: boolean;
 }) => {
     const [projectionYears, setProjectionYears] = useState(5);
     const [detailedView, setDetailedView] = useState(false);
@@ -30,6 +33,10 @@ const ProjectionPanel = ({
         totalValue > 0 && Object.keys(historicalReturns).length > 0
             ? calculateProjection(positions, historicalReturns, projectionYears, detailedView)
             : [];
+
+    if (loading) {
+        return <SkeletonChart height="500px" />;
+    }
 
     return (
         <div className="bg-gray-800 rounded-lg p-4">
@@ -47,47 +54,47 @@ const ProjectionPanel = ({
                 />
             </div>
             <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={projectionData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="year" tickFormatter={(y) => `Year ${y}`} stroke="#9ca3af" fontSize={12} />
-                    <YAxis tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} stroke="#9ca3af" fontSize={12} />
-                    <Tooltip formatter={(v) => `€${Number(v).toFixed(0)}`} labelFormatter={(y) => `Year ${y}`} />
-                    <Legend />
-                    {detailedView ? (
-                        positions.map((p, i) => (
-                            <Line
-                                key={p.ticker}
-                                type="monotone"
-                                dataKey={p.ticker}
-                                stroke={getPositionColor(p, i)}
-                                strokeWidth={2}
-                                dot={false}
-                                name={p.name}
-                            />
-                        ))
-                    ) : (
-                        <>
-                            <Line
-                                type="monotone"
-                                dataKey="withDividends"
-                                stroke="#10b981"
-                                strokeWidth={2}
-                                dot={false}
-                                name="With Reinvested Dividends"
-                            />
-                            <Line
-                                type="monotone"
-                                dataKey="withoutDividends"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                dot={false}
-                                name="Without Dividends"
-                            />
-                        </>
-                    )}
-                </LineChart>
-            </ResponsiveContainer>
-            <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-center">
+                        <LineChart data={projectionData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                            <XAxis dataKey="year" tickFormatter={(y) => `Year ${y}`} stroke="#9ca3af" fontSize={12} />
+                            <YAxis tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} stroke="#9ca3af" fontSize={12} />
+                            <Tooltip formatter={(v) => `€${Number(v).toFixed(0)}`} labelFormatter={(y) => `Year ${y}`} />
+                            <Legend />
+                            {detailedView ? (
+                                positions.map((p, i) => (
+                                    <Line
+                                        key={p.ticker}
+                                        type="monotone"
+                                        dataKey={p.ticker}
+                                        stroke={getPositionColor(p, i)}
+                                        strokeWidth={2}
+                                        dot={false}
+                                        name={p.name}
+                                    />
+                                ))
+                            ) : (
+                                <>
+                                    <Line
+                                        type="monotone"
+                                        dataKey="withDividends"
+                                        stroke="#10b981"
+                                        strokeWidth={2}
+                                        dot={false}
+                                        name="With Reinvested Dividends"
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="withoutDividends"
+                                        stroke="#3b82f6"
+                                        strokeWidth={2}
+                                        dot={false}
+                                        name="Without Dividends"
+                                    />
+                                </>
+                            )}
+                        </LineChart>
+                    </ResponsiveContainer>
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-center">
                 <div className="bg-gray-700 rounded p-2">
                     <p className="text-gray-400">Current Portfolio Value</p>
                     <p className="text-blue-400 font-bold">€{totalValue.toFixed(0)}</p>

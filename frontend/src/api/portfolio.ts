@@ -6,14 +6,12 @@ import type { Position } from '../types';
 
 export interface PositionCreate {
     ticker: string;
-    name: string;
     quantity: number;
     buy_price: number;
     color?: string;
 }
 
 export interface PositionUpdate {
-    name?: string;
     quantity?: number;
     buy_price?: number;
     color?: string;
@@ -21,7 +19,6 @@ export interface PositionUpdate {
 
 export interface BulkImportPosition {
     ticker: string;
-    name?: string;
     quantity: number;
     buyPrice: number;
     color?: string;

@@ -20,10 +20,12 @@ interface PortfolioPageProps {
     setPositions: (positions: Position[]) => void;
     /** Function to update current prices */
     updatePrices: () => void;
+    /** Loading state for initial positions fetch */
+    positionsLoading: boolean;
     /** Loading state for price updates */
-    loading: boolean;
-    /** Function to fetch historical price data */
-    fetchHistoricalData: (tickers: string[]) => Promise<void>;
+    pricesLoading: boolean;
+    /** Loading state for historical data */
+    historicalLoading: boolean;
     /** Historical price data by ticker */
     historicalData: { [ticker: string]: any[] };
     /** Historical returns (CAGR) by ticker */
@@ -40,30 +42,41 @@ const PortfolioPage = ({
     deletePosition,
     setPositions,
     updatePrices,
-    loading,
-    fetchHistoricalData,
+    positionsLoading,
+    pricesLoading,
+    historicalLoading,
     historicalData,
     historicalReturns,
 }: PortfolioPageProps) => {
     return (
         <div>
-            <SummaryCards positions={positions} />
+            <SummaryCards positions={positions} loading={positionsLoading} />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <HistoricalPerformanceChart positions={positions} historicalData={historicalData} />
-                <AllocationPieChart positions={positions} />
+                <HistoricalPerformanceChart
+                    positions={positions}
+                    historicalData={historicalData}
+                    loading={historicalLoading}
+                />
+                <AllocationPieChart
+                    positions={positions}
+                    loading={positionsLoading}
+                />
                 <PositionsTable
                     positions={positions}
                     addPosition={addPosition}
                     deletePosition={deletePosition}
                     setPositions={setPositions}
                     updatePrices={updatePrices}
-                    loading={loading}
-                    fetchHistoricalData={fetchHistoricalData}
+                    loading={positionsLoading || pricesLoading}
                 />
             </div>
 
-            <ProjectionPanel positions={positions} historicalReturns={historicalReturns} />
+            <ProjectionPanel
+                positions={positions}
+                historicalReturns={historicalReturns}
+                loading={historicalLoading}
+            />
         </div>
     );
 };

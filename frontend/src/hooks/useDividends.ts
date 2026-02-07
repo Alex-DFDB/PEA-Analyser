@@ -71,7 +71,7 @@ export function useDividends(positions: Position[]) {
                         allEvents.push({
                             date: new Date(payment.date),
                             ticker: divData.ticker,
-                            name: position.name,
+                            name: position.name || position.ticker,
                             amount: payment.amount * position.quantity,
                             yield: payment.yield,
                             priceAtPayment: payment.priceAtPayment,
@@ -91,7 +91,8 @@ export function useDividends(positions: Position[]) {
         };
 
         fetchDividends();
-    }, [positions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [positions.map(p => p.ticker).sort().join(',')]);
 
     // Calculate statistics from events
     const totalAmount = events.reduce((sum, e) => sum + e.amount, 0);

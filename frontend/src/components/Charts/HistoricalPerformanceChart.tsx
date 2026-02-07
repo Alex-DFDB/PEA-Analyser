@@ -4,19 +4,23 @@ import { TrendingUp } from "lucide-react";
 import type { Position } from "../../types";
 import { getPositionColor } from "../../utils/colors";
 import { formatDate } from "../../utils/date";
+import { SkeletonChart } from "../common/Skeleton";
 
 /**
  * HistoricalPerformanceChart displays the historical performance of positions over 5 years
  * Each line shows the percentage change relative to the first data point
  * @param positions - Array of portfolio positions
  * @param historicalData - Historical price data for each ticker
+ * @param loading - Loading state for historical data
  */
 const HistoricalPerformanceChart = ({
     positions,
     historicalData,
+    loading = false,
 }: {
     positions: Position[];
     historicalData: { [ticker: string]: any[] };
+    loading?: boolean;
 }) => {
     if (positions.length === 0) return null;
 
@@ -55,6 +59,10 @@ const HistoricalPerformanceChart = ({
     };
 
     const historicalChartData = prepareHistoricalChartData();
+
+    if (loading) {
+        return <SkeletonChart height="400px" />;
+    }
 
     return (
         <div className="bg-gray-800 rounded-lg p-4">

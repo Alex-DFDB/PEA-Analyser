@@ -21,7 +21,6 @@ class Position(Model):
     id = AutoField(primary_key=True)
     user = ForeignKeyField(User, column_name='id_user', backref='positions', on_delete='CASCADE')
     ticker = CharField(max_length=20, index=True)
-    name = CharField(max_length=255)
     quantity = DecimalField(max_digits=10, decimal_places=4)
     buy_price = DecimalField(max_digits=10, decimal_places=4)
     color = CharField(max_length=7, null=True)  # Hex color code

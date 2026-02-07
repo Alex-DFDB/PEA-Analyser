@@ -24,8 +24,8 @@ export type Position = {
     id?: number;
     /** Stock ticker symbol (e.g., "AAPL", "GOOGL") */
     ticker: string;
-    /** Company or stock name */
-    name: string;
+    /** Company or stock name (from API quote, not stored in DB) */
+    name?: string;
     /** Number of shares owned */
     quantity: number;
     /** Purchase price per share */

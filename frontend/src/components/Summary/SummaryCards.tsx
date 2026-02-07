@@ -3,13 +3,24 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import type { Position } from "../../types";
 import { calculateTotals } from "../../utils/calculations";
 import SummaryCard from "./SummaryCard";
+import { SkeletonCard } from "../common/Skeleton";
 
 /**
  * SummaryCards displays key portfolio metrics in a card layout
  * Shows total value, invested amount, and profit/loss with visual indicators
  */
-const SummaryCards = ({ positions }: { positions: Position[] }) => {
+const SummaryCards = ({ positions, loading = false }: { positions: Position[]; loading?: boolean }) => {
     const { totalValue, totalInvested, totalPV, totalPVPercent } = calculateTotals(positions);
+
+    if (loading) {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {[1, 2, 3].map((i) => (
+                    <SkeletonCard key={i} height="120px" />
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

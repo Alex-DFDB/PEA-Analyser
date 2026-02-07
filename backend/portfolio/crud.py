@@ -42,7 +42,6 @@ def get_position(position_id: int, id_user: str) -> Optional[Position]:
 def create_position(
     id_user: str,
     ticker: str,
-    name: str,
     quantity: Decimal,
     buy_price: Decimal,
     color: Optional[str] = None
@@ -53,7 +52,6 @@ def create_position(
     Args:
         id_user: User ID
         ticker: Stock ticker
-        name: Company name
         quantity: Number of shares
         buy_price: Purchase price
         color: Hex color code (optional)
@@ -67,7 +65,6 @@ def create_position(
     position = Position.create(
         user=id_user,
         ticker=ticker.upper(),
-        name=name,
         quantity=quantity,
         buy_price=buy_price,
         color=color,
@@ -80,7 +77,6 @@ def create_position(
 def update_position(
     position_id: int,
     id_user: str,
-    name: Optional[str] = None,
     quantity: Optional[Decimal] = None,
     buy_price: Optional[Decimal] = None,
     color: Optional[str] = None
@@ -91,7 +87,6 @@ def update_position(
     Args:
         position_id: Position ID
         id_user: User ID
-        name: New company name (optional)
         quantity: New quantity (optional)
         buy_price: New buy price (optional)
         color: New color (optional)
@@ -104,8 +99,6 @@ def update_position(
         return None
 
     # Update fields
-    if name is not None:
-        position.name = name
     if quantity is not None:
         position.quantity = quantity
     if buy_price is not None:
@@ -141,7 +134,6 @@ def delete_position(position_id: int, id_user: str) -> bool:
 def upsert_position(
     id_user: str,
     ticker: str,
-    name: str,
     quantity: Decimal,
     buy_price: Decimal,
     color: Optional[str] = None
@@ -152,7 +144,6 @@ def upsert_position(
     Args:
         id_user: User ID
         ticker: Stock ticker
-        name: Company name
         quantity: Number of shares
         buy_price: Purchase price
         color: Hex color code (optional)
@@ -165,7 +156,6 @@ def upsert_position(
         position = Position.get((Position.user == id_user) & (Position.ticker == ticker.upper()))
 
         # Update existing position
-        position.name = name
         position.quantity = quantity
         position.buy_price = buy_price
         if color:
@@ -176,4 +166,4 @@ def upsert_position(
         return position
     except DoesNotExist:
         # Create new position
-        return create_position(id_user, ticker, name, quantity, buy_price, color)
+        return create_position(id_user, ticker, quantity, buy_price, color)

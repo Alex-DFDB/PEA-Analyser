@@ -4,6 +4,7 @@ import { PieChart } from "lucide-react";
 import type { Position } from "../../types";
 import { calcValue } from "../../utils/calculations";
 import { getPositionColor } from "../../utils/colors";
+import { SkeletonChart } from "../common/Skeleton";
 
 /**
  * Custom label renderer for pie chart with percentage
@@ -16,9 +17,14 @@ const renderCustomLabel = (props: any) => {
 /**
  * AllocationPieChart component displays portfolio allocation as a pie chart
  * @param positions - Array of portfolio positions to visualize
+ * @param loading - Loading state
  */
-const AllocationPieChart = ({ positions }: { positions: Position[] }) => {
+const AllocationPieChart = ({ positions, loading = false }: { positions: Position[]; loading?: boolean }) => {
     if (positions.length === 0) return null;
+
+    if (loading) {
+        return <SkeletonChart height="400px" />;
+    }
 
     const pieData = positions.map((p) => ({ name: p.name, value: calcValue(p) }));
 
@@ -29,26 +35,26 @@ const AllocationPieChart = ({ positions }: { positions: Position[] }) => {
                 <h2 className="font-semibold">Portfolio Allocation</h2>
             </div>
             <ResponsiveContainer width="100%" height={400}>
-                <RechartsPie>
-                    <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={120}
-                        label={renderCustomLabel}
-                        labelLine={{ stroke: '#9ca3af', strokeWidth: 1 }}
-                        fill="#8884d8"
-                    >
-                        {positions.map((p, i) => (
-                            <Cell key={p.ticker} fill={getPositionColor(p, i)} />
-                        ))}
-                    </Pie>
-                    <Tooltip formatter={(v) => `€${Number(v).toFixed(2)}`} />
-                </RechartsPie>
-            </ResponsiveContainer>
+                    <RechartsPie>
+                        <Pie
+                            data={pieData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={120}
+                            label={renderCustomLabel}
+                            labelLine={{ stroke: '#9ca3af', strokeWidth: 1 }}
+                            fill="#8884d8"
+                        >
+                            {positions.map((p, i) => (
+                                <Cell key={p.ticker} fill={getPositionColor(p, i)} />
+                            ))}
+                        </Pie>
+                        <Tooltip formatter={(v) => `€${Number(v).toFixed(2)}`} />
+                    </RechartsPie>
+                </ResponsiveContainer>
         </div>
     );
 };

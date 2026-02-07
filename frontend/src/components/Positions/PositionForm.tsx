@@ -9,13 +9,12 @@ const PositionForm = ({
     //onCancel,
     loading,
 }: {
-    onSubmit: (ticker: string, name: string, quantity: number, buyPrice: number, color?: string) => void;
+    onSubmit: (ticker: string, quantity: number, buyPrice: number, color?: string) => void;
     onCancel: () => void;
     loading: boolean;
 }) => {
     const [form, setForm] = useState({
         ticker: "",
-        name: "",
         quantity: "",
         buyPrice: "",
         color: "",
@@ -30,28 +29,20 @@ const PositionForm = ({
 
         onSubmit(
             form.ticker.toUpperCase(),
-            form.name || form.ticker,
             parseFloat(form.quantity),
             parseFloat(form.buyPrice),
             form.color || undefined,
         );
 
-        setForm({ ticker: "", name: "", quantity: "", buyPrice: "", color: "" });
+        setForm({ ticker: "", quantity: "", buyPrice: "", color: "" });
     };
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
             <input
                 placeholder="Ticker"
                 value={form.ticker}
                 onChange={(e) => setForm({ ...form, ticker: e.target.value })}
-                className="bg-gray-700 rounded px-3 py-2 text-sm"
-                disabled={loading}
-            />
-            <input
-                placeholder="Name (optional)"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="bg-gray-700 rounded px-3 py-2 text-sm"
                 disabled={loading}
             />
@@ -91,7 +82,7 @@ const PositionForm = ({
             <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="col-span-2 md:col-span-5 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded py-2 text-sm cursor-pointer"
+                className="col-span-2 md:col-span-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded py-2 text-sm cursor-pointer"
             >
                 {loading ? "Adding Position..." : "Add Position"}
             </button>

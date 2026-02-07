@@ -11,8 +11,10 @@ import { calculateHistoricalReturn } from "../utils/projections";
 export function useHistoricalData() {
     const [historicalReturns, setHistoricalReturns] = useState<{ [ticker: string]: number }>({});
     const [historicalData, setHistoricalData] = useState<{ [ticker: string]: any[] }>({});
+    const [loading, setLoading] = useState(false);
 
     const fetchHistoricalData = async (tickers: string[]) => {
+        setLoading(true);
         try {
             const response = await fetch(`${API_URL}/api/historical`, {
                 method: "POST",
@@ -37,8 +39,10 @@ export function useHistoricalData() {
             setHistoricalData(historical);
         } catch (error) {
             console.error("Unable to fetch historical data:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    return { historicalReturns, historicalData, fetchHistoricalData };
+    return { historicalReturns, historicalData, fetchHistoricalData, loading };
 }

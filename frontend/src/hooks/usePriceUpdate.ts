@@ -8,13 +8,11 @@ import { API_URL } from "../utils/constants";
  * Hook for updating current prices and dividend yields for positions
  * @param positions Current array of positions
  * @param setPositions Function to update positions state
- * @param fetchHistoricalData Function to fetch historical data after price update
  * @returns Object containing updatePrices function and loading state
  */
 export function usePriceUpdate(
     positions: Position[],
     setPositions: (positions: Position[]) => void,
-    fetchHistoricalData: (tickers: string[]) => Promise<void>,
 ) {
     const [loading, setLoading] = useState(false);
 
@@ -41,13 +39,13 @@ export function usePriceUpdate(
                         ...pos,
                         currentPrice: quote.currentPrice,
                         dividendYield: quote.dividendYield || pos.dividendYield,
+                        name: quote.name,
                     };
                 }
                 return pos;
             });
 
             setPositions(updatedPositions);
-            await fetchHistoricalData(tickers);
         } catch (error) {
             alert("Error updating prices. Please verify that the FastAPI server is running.");
         } finally {
