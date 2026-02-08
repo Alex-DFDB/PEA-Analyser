@@ -7,6 +7,28 @@ import { formatDate } from "../../utils/date";
 import { SkeletonChart } from "../common/Skeleton";
 
 /**
+ * Custom tooltip component for displaying performance data
+ */
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 shadow-lg max-w-xs">
+                <p className="text-sm font-semibold text-white mb-2">
+                    {formatDate(new Date(label))}
+                </p>
+                {payload.map((entry: any, index: number) => (
+                    <div key={index} className="text-xs flex justify-between gap-3 py-0.5">
+                        <span style={{ color: entry.color }}>{entry.name}:</span>
+                        <span className="font-semibold text-white">{entry.value.toFixed(2)}%</span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
+
+/**
  * HistoricalPerformanceChart displays the historical performance of positions over 5 years
  * Each line shows the percentage change relative to the first data point
  * @param positions - Array of portfolio positions
@@ -81,7 +103,7 @@ const HistoricalPerformanceChart = ({
                             fontSize={12}
                         />
                         <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} stroke="#9ca3af" fontSize={12} />
-                        <Tooltip formatter={(v: any) => `${v.toFixed(2)}%`} labelFormatter={(date) => formatDate(new Date(date))} />
+                        <Tooltip content={<CustomTooltip />} />
                         <Legend />
                         {positions.map((p, i) => (
                             <Line

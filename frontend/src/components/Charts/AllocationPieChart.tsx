@@ -36,6 +36,21 @@ const renderCustomLabel = (props: any) => {
 };
 
 /**
+ * Custom tooltip component for displaying position value
+ */
+const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 shadow-lg">
+                <p className="text-sm font-semibold text-white mb-1">{payload[0].name}</p>
+                <p className="text-sm text-blue-400">{payload[0].value.toFixed(2)}€</p>
+            </div>
+        );
+    }
+    return null;
+};
+
+/**
  * AllocationPieChart component displays portfolio allocation as a pie chart
  * @param positions - Array of portfolio positions to visualize
  * @param loading - Loading state
@@ -74,7 +89,7 @@ const AllocationPieChart = ({ positions, loading = false }: { positions: Positio
                                 <Cell key={p.ticker} fill={getPositionColor(p, i)} />
                             ))}
                         </Pie>
-                        <Tooltip formatter={(v) => `${Number(v).toFixed(2)}€`} />
+                        <Tooltip content={<CustomTooltip />} />
                     </RechartsPie>
                 </ResponsiveContainer>
         </div>

@@ -10,6 +10,28 @@ import { getPositionColor } from "../../utils/colors";
 import { SkeletonChart } from "../common/Skeleton";
 
 /**
+ * Custom tooltip component for displaying projection data
+ */
+const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 shadow-lg max-w-xs">
+                <p className="text-sm font-semibold text-white mb-2">
+                    Year {label}
+                </p>
+                {payload.map((entry: any, index: number) => (
+                    <div key={index} className="text-xs flex justify-between gap-3 py-0.5">
+                        <span style={{ color: entry.color }}>{entry.name}:</span>
+                        <span className="font-semibold text-white">{Number(entry.value).toFixed(2)}€</span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
+
+/**
  * ProjectionPanel displays future value projections based on historical returns
  * Offers two views: detailed (per position) and total (with/without dividends)
  * Projections assume dividend reinvestment where applicable
@@ -58,7 +80,7 @@ const ProjectionPanel = ({
                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                             <XAxis dataKey="year" tickFormatter={(y) => `Year ${y}`} stroke="#9ca3af" fontSize={12} />
                             <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(2)}k€`} stroke="#9ca3af" fontSize={12} />
-                            <Tooltip formatter={(v) => `${Number(v).toFixed(2)}€`} labelFormatter={(y) => `Year ${y}`} />
+                            <Tooltip content={<CustomTooltip />} />
                             <Legend />
                             {detailedView ? (
                                 positions.map((p, i) => (
