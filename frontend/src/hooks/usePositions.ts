@@ -23,7 +23,14 @@ export function usePositions() {
                 const data = await getPositions();
 
                 if (data.length > 0) {
-                    // Fetch quotes to get names and current prices
+                    // Set positions immediately so historical/dividends can start fetching in parallel
+                    const initialPositions = data.map(p => ({
+                        ...p,
+                        currentPrice: p.buyPrice,
+                    }));
+                    setPositions(initialPositions);
+
+                    // Then fetch quotes to enrich with names and current prices
                     try {
                         const tickers = data.map(p => p.ticker);
                         const response = await fetch(`${API_URL}/api/quotes`, {
@@ -35,8 +42,7 @@ export function usePositions() {
                         if (response.ok) {
                             const quotes = await response.json();
 
-                            // Map positions with names and current prices from quotes
-                            const mappedPositions = data.map(p => {
+                            const enrichedPositions = data.map(p => {
                                 const quote = quotes.find((q: any) => q.ticker === p.ticker);
                                 return {
                                     ...p,
@@ -45,23 +51,10 @@ export function usePositions() {
                                     dividendYield: quote?.dividendYield,
                                 };
                             });
-                            setPositions(mappedPositions);
-                        } else {
-                            // Fallback: just use buy price if quotes fetch fails
-                            const mappedPositions = data.map(p => ({
-                                ...p,
-                                currentPrice: p.buyPrice,
-                            }));
-                            setPositions(mappedPositions);
+                            setPositions(enrichedPositions);
                         }
                     } catch (error) {
                         console.error("Failed to fetch quotes:", error);
-                        // Fallback: just use buy price
-                        const mappedPositions = data.map(p => ({
-                            ...p,
-                            currentPrice: p.buyPrice,
-                        }));
-                        setPositions(mappedPositions);
                     }
                 } else {
                     setPositions([]);

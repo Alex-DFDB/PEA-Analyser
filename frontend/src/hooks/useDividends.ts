@@ -37,7 +37,7 @@ export function useDividends(positions: Position[], autoFetch = true) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchDividends = useCallback(async (targetPositions: Position[] = positions) => {
+    const fetchDividends = useCallback(async (targetPositions: Position[]) => {
         if (targetPositions.length === 0) {
             setDividendData([]);
             setEvents([]);
@@ -88,7 +88,7 @@ export function useDividends(positions: Position[], autoFetch = true) {
         } finally {
             setLoading(false);
         }
-    }, [positions]);
+    }, []);
 
     useEffect(() => {
         if (autoFetch) {
