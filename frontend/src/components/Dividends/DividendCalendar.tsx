@@ -222,7 +222,7 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
                 <div className="flex items-center gap-4">
                     <div className="text-sm bg-gray-700 px-3 py-1 rounded">
                         <span className="text-gray-400">Total {currentYear}: </span>
-                        <span className="text-orange-400 font-bold">€{totalAnnual.toFixed(2)}</span>
+                        <span className="text-orange-400 font-bold">{totalAnnual.toFixed(2)}€</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -250,7 +250,7 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-gray-700/50 rounded p-3">
                     <p className="text-xs text-gray-400">Total Received (10 Years)</p>
-                    <p className="text-lg font-bold text-orange-400">€{totalAmount.toFixed(0)}</p>
+                    <p className="text-lg font-bold text-orange-400">{totalAmount.toFixed(2)}€</p>
                 </div>
                 <div className="bg-gray-700/50 rounded p-3">
                     <p className="text-xs text-gray-400">Number of Payments</p>

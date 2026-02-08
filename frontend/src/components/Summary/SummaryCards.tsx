@@ -26,11 +26,11 @@ const SummaryCards = ({ positions, loading = false }: { positions: Position[]; l
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <SummaryCard
                 label="Total Portfolio Value"
-                value={<p className="text-2xl font-bold">€{totalValue.toFixed(2)}</p>}
+                value={<p className="text-2xl font-bold">{totalValue.toFixed(2)}€</p>}
             />
             <SummaryCard
                 label="Total Invested"
-                value={<p className="text-2xl font-bold">€{totalInvested.toFixed(2)}</p>}
+                value={<p className="text-2xl font-bold">{totalInvested.toFixed(2)}€</p>}
             />
             <SummaryCard
                 label="Profit/Loss"
@@ -39,7 +39,7 @@ const SummaryCards = ({ positions, loading = false }: { positions: Position[]; l
                 }
                 value={
                     <p className={`text-2xl font-bold ${totalPV >= 0 ? "text-green-400" : "text-red-400"}`}>
-                        {totalPV >= 0 ? "+" : ""}€{totalPV.toFixed(2)} ({totalPVPercent.toFixed(2)}%)
+                        {totalPV >= 0 ? "+" : ""}{totalPV.toFixed(2)}€ ({totalPVPercent.toFixed(2)}%)
                     </p>
                 }
             />

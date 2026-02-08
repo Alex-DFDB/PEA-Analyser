@@ -57,8 +57,8 @@ const ProjectionPanel = ({
                         <LineChart data={projectionData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                             <XAxis dataKey="year" tickFormatter={(y) => `Year ${y}`} stroke="#9ca3af" fontSize={12} />
-                            <YAxis tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} stroke="#9ca3af" fontSize={12} />
-                            <Tooltip formatter={(v) => `€${Number(v).toFixed(0)}`} labelFormatter={(y) => `Year ${y}`} />
+                            <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(2)}k€`} stroke="#9ca3af" fontSize={12} />
+                            <Tooltip formatter={(v) => `${Number(v).toFixed(2)}€`} labelFormatter={(y) => `Year ${y}`} />
                             <Legend />
                             {detailedView ? (
                                 positions.map((p, i) => (
@@ -97,16 +97,16 @@ const ProjectionPanel = ({
                     <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-center">
                 <div className="bg-gray-700 rounded p-2">
                     <p className="text-gray-400">Current Portfolio Value</p>
-                    <p className="text-blue-400 font-bold">€{totalValue.toFixed(0)}</p>
+                    <p className="text-blue-400 font-bold">{totalValue.toFixed(2)}€</p>
                 </div>
                 {detailedView ? (
                     <div className="bg-gray-700 rounded p-2">
                         <p className="text-gray-400">Projected Value ({projectionYears} years)</p>
                         <p className="text-green-400 font-bold">
-                            €{Object.values(projectionData[projectionData.length - 1] || {})
+                            {Object.values(projectionData[projectionData.length - 1] || {})
                                 .filter((v) => typeof v === "number")
                                 .reduce((sum: number, v) => sum + (v as number), 0)
-                                .toFixed(0)}
+                                .toFixed(2)}€
                         </p>
                     </div>
                 ) : (
@@ -114,13 +114,13 @@ const ProjectionPanel = ({
                         <div className="bg-gray-700 rounded p-2">
                             <p className="text-gray-400">Without Dividends ({projectionYears} years)</p>
                             <p className="text-blue-400 font-bold">
-                                €{projectionData[projectionData.length - 1]?.withoutDividends.toFixed(0)}
+                                {projectionData[projectionData.length - 1]?.withoutDividends.toFixed(2)}€
                             </p>
                         </div>
                         <div className="bg-gray-700 rounded p-2 col-span-2">
                             <p className="text-gray-400">With Reinvested Dividends ({projectionYears} years)</p>
                             <p className="text-green-400 font-bold">
-                                €{projectionData[projectionData.length - 1]?.withDividends.toFixed(0)}
+                                {projectionData[projectionData.length - 1]?.withDividends.toFixed(2)}€
                             </p>
                         </div>
                     </>

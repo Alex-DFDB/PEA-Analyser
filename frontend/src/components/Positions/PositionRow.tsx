@@ -22,11 +22,11 @@ const PositionRow = ({ position, onDelete }: { position: Position; onDelete: () 
                 </div>
             </td>
             <td>{position.quantity}</td>
-            <td>€{position.buyPrice.toFixed(2)}</td>
-            <td>€{position.currentPrice.toFixed(2)}</td>
-            <td>€{calcValue(position).toFixed(2)}</td>
+            <td>{position.buyPrice.toFixed(2)}€</td>
+            <td>{position.currentPrice.toFixed(2)}€</td>
+            <td>{calcValue(position).toFixed(2)}€</td>
             <td className={pv >= 0 ? "text-green-400" : "text-red-400"}>
-                {pv >= 0 ? "+" : ""}€{pv.toFixed(2)} ({pvPct.toFixed(1)}%)
+                {pv >= 0 ? "+" : ""}{pv.toFixed(2)}€ ({pvPct.toFixed(1)}%)
             </td>
             <td>
                 <button onClick={onDelete} className="text-red-400 hover:text-red-300 cursor-pointer">

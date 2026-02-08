@@ -29,7 +29,7 @@ const renderCustomLabel = (props: any) => {
                 {name}
             </tspan>
             <tspan x={x} dy="14" fontSize="10px" fill="#d1d5db">
-                {`(${(percent * 100).toFixed(1)}% | ${value.toFixed(0)}€)`}
+                {`(${(percent * 100).toFixed(1)}% | ${value.toFixed(2)}€)`}
             </tspan>
         </text>
     );
@@ -74,7 +74,7 @@ const AllocationPieChart = ({ positions, loading = false }: { positions: Positio
                                 <Cell key={p.ticker} fill={getPositionColor(p, i)} />
                             ))}
                         </Pie>
-                        <Tooltip formatter={(v) => `€${Number(v).toFixed(2)}`} />
+                        <Tooltip formatter={(v) => `${Number(v).toFixed(2)}€`} />
                     </RechartsPie>
                 </ResponsiveContainer>
         </div>

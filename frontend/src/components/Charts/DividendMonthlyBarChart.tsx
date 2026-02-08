@@ -51,7 +51,7 @@ const DividendMonthlyBarChart = ({ events, year }: DividendMonthlyBarChartProps)
         const yearEvents = events.filter((e) => e.date.getFullYear() === year);
 
         // Initialize all months with 0
-        const monthlyTotals = Array.from({ length: 12 }, (_, i) => ({
+        const monthlyTotals: MonthlyData[] = Array.from({ length: 12 }, (_, i) => ({
             month: monthNames[i],
             monthIndex: i,
             total: 0,
@@ -95,7 +95,9 @@ const DividendMonthlyBarChart = ({ events, year }: DividendMonthlyBarChartProps)
             const monthData = payload[0].payload;
             return (
                 <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 shadow-lg max-w-xs">
-                    <p className="text-sm font-semibold text-white mb-2">{monthData.month} {year}</p>
+                    <p className="text-sm font-semibold text-white mb-2">
+                        {monthData.month} {year}
+                    </p>
                     {showByTicker ? (
                         <>
                             {payload
@@ -104,25 +106,42 @@ const DividendMonthlyBarChart = ({ events, year }: DividendMonthlyBarChartProps)
                                 .map((entry: any, index: number) => (
                                     <div key={index} className="text-xs flex justify-between gap-3 py-0.5">
                                         <span style={{ color: entry.color }}>{entry.name}:</span>
-                                        <span className="font-semibold text-white">€{entry.value.toFixed(2)}</span>
+                                        <span className="font-semibold text-white">{entry.value.toFixed(2)}€</span>
                                     </div>
                                 ))}
                             <div className="border-t border-gray-600 mt-2 pt-2">
                                 <div className="text-sm flex justify-between gap-3">
                                     <span className="text-orange-400 font-semibold">Total:</span>
-                                    <span className="text-orange-400 font-semibold">€{monthData.total.toFixed(2)}</span>
+                                    <span className="text-orange-400 font-semibold">{monthData.total.toFixed(2)}€</span>
                                 </div>
                             </div>
                         </>
                     ) : (
-                        <p className="text-sm text-orange-400">
-                            Total: €{payload[0].value.toFixed(2)}
-                        </p>
+                        <p className="text-sm text-orange-400">Total: {payload[0].value.toFixed(2)}€</p>
                     )}
                 </div>
             );
         }
         return null;
+    };
+
+    /**
+     * Custom legend component with square rounded icons
+     */
+    const CustomLegend = ({ payload }: any) => {
+        return (
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
+                {payload.map((entry: any, index: number) => (
+                    <div key={`legend-${index}`} className="flex items-center gap-2">
+                        <div
+                            className="w-4 h-4 rounded"
+                            style={{ backgroundColor: entry.color }}
+                        />
+                        <span className="text-xs text-gray-400">{entry.value}</span>
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     /**
@@ -162,7 +181,7 @@ const DividendMonthlyBarChart = ({ events, year }: DividendMonthlyBarChartProps)
                     <span className="text-sm text-gray-400">Total</span>
                     <button
                         onClick={() => setShowByTicker(!showByTicker)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-gray-800 ${
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                             showByTicker ? "bg-orange-500" : "bg-gray-600"
                         }`}
                         role="switch"
@@ -183,30 +202,14 @@ const DividendMonthlyBarChart = ({ events, year }: DividendMonthlyBarChartProps)
                 <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={monthlyData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis
-                            dataKey="month"
-                            stroke="#9ca3af"
-                            fontSize={12}
-                        />
-                        <YAxis
-                            tickFormatter={(v) => `€${v.toFixed(0)}`}
-                            stroke="#9ca3af"
-                            fontSize={12}
-                        />
+                        <XAxis dataKey="month" stroke="#9ca3af" fontSize={12} />
+                        <YAxis tickFormatter={(v) => `${v.toFixed(2)}€`} stroke="#9ca3af" fontSize={12} />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255, 255, 255, 0.1)" }} />
                         {showByTicker ? (
                             <>
-                                <Legend
-                                    wrapperStyle={{ fontSize: "12px" }}
-                                    iconType="rect"
-                                />
+                                <Legend content={<CustomLegend />} />
                                 {tickers.map((ticker, index) => (
-                                    <Bar
-                                        key={ticker}
-                                        dataKey={ticker}
-                                        stackId="dividends"
-                                        fill={getTickerColor(index, tickers.length)}
-                                    />
+                                    <Bar key={ticker} dataKey={ticker} stackId="dividends" fill={getTickerColor(index, tickers.length)} />
                                 ))}
                             </>
                         ) : (
