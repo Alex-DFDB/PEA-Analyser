@@ -7,11 +7,32 @@ import { getPositionColor } from "../../utils/colors";
 import { SkeletonChart } from "../common/Skeleton";
 
 /**
- * Custom label renderer for pie chart with percentage
+ * Custom label renderer for pie chart with percentage and value
  */
 const renderCustomLabel = (props: any) => {
-    const { name, percent } = props;
-    return `${name} (${(percent * 100).toFixed(1)}%)`;
+    const { cx, cy, midAngle, outerRadius, name, percent, value } = props;
+
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 30; // Position à l'extérieur du graphique
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+        <text
+            x={x}
+            y={y}
+            fill="white"
+            textAnchor={x > cx ? 'start' : 'end'}
+            dominantBaseline="central"
+        >
+            <tspan x={x} dy="-7" fontSize="12px" fontWeight="500">
+                {name}
+            </tspan>
+            <tspan x={x} dy="14" fontSize="10px" fill="#d1d5db">
+                {`(${(percent * 100).toFixed(1)}% | ${value.toFixed(0)}€)`}
+            </tspan>
+        </text>
+    );
 };
 
 /**

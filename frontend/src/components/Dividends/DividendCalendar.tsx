@@ -4,6 +4,7 @@ import type { Position } from "../../types";
 import type { DividendEvent } from "../../hooks/useDividends";
 import { formatDate } from "../../utils/date";
 import { SkeletonDividendCalendar } from "../common/Skeleton";
+import DividendMonthlyBarChart from "../Charts/DividendMonthlyBarChart";
 
 /**
  * Color scheme constants for dividend yield visualization
@@ -264,6 +265,10 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
                 {Array.from({ length: 12 }, (_, i) => (
                     <MonthCalendar key={i} year={currentYear} month={i} events={yearEvents} />
                 ))}
+            </div>
+
+            <div className="mt-6">
+                <DividendMonthlyBarChart events={yearEvents} year={currentYear} />
             </div>
 
             <div className="mt-4 border-t border-gray-700 pt-4">
