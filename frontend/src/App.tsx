@@ -38,7 +38,7 @@ function AppContent() {
             ]);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [positions.map(p => p.ticker).sort().join(',')]);
+    }, [positions.map(p => p.ticker).sort().join(','), dividendState.fetchDividends]);
 
     /**
      * Refresh all data in parallel (quotes, historical, dividends)
