@@ -9,7 +9,7 @@ import { useQuote } from "../../hooks/useQuote";
 import { useQuotes } from "../../hooks/useQuotes";
 import { generateRandomColor } from "../../utils/colors";
 import { bulkImportPositions } from "../../api/portfolio";
-import { SkeletonTableRow } from "../common/Skeleton";
+import Skeleton from "../common/Skeleton";
 
 /**
  * PositionsTable manages the display and manipulation of portfolio positions
@@ -40,12 +40,7 @@ const PositionsTable = ({
      * Handles adding a new position with real-time price data
      * Falls back to buy price if quote fetch fails
      */
-    const handleAddPosition = async (
-        ticker: string,
-        quantity: number,
-        buyPrice: number,
-        color?: string,
-    ) => {
+    const handleAddPosition = async (ticker: string, quantity: number, buyPrice: number, color?: string) => {
         try {
             const quote = await fetchQuote(ticker);
 
@@ -115,7 +110,7 @@ const PositionsTable = ({
                                 name: quote?.name,
                                 color: p.color,
                                 created_at: p.created_at,
-                                updated_at: p.updated_at
+                                updated_at: p.updated_at,
                             };
                         });
 
@@ -133,7 +128,7 @@ const PositionsTable = ({
                                 currentPrice: buyPrice,
                                 color: p.color,
                                 created_at: p.created_at,
-                                updated_at: p.updated_at
+                                updated_at: p.updated_at,
                             };
                         });
                         setPositions(fallbackPositions);
@@ -164,33 +159,22 @@ const PositionsTable = ({
                 />
             </div>
 
-            {showForm && (
-                <PositionForm onSubmit={handleAddPosition} onCancel={() => setShowForm(false)} loading={addLoading} />
-            )}
+            {showForm && <PositionForm onSubmit={handleAddPosition} onCancel={() => setShowForm(false)} loading={addLoading} />}
 
-            {loading && positions.length === 0 ? (
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="text-gray-400 text-left">
-                                <th className="pb-2">Name</th>
-                                <th className="pb-2">Quantity</th>
-                                <th className="pb-2">Buy Price</th>
-                                <th className="pb-2">Current Price</th>
-                                <th className="pb-2">Total Value</th>
-                                <th className="pb-2">Profit/Loss</th>
-                                <th className="pb-2"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[1, 2, 3].map((i) => (
-                                <SkeletonTableRow key={i} />
-                            ))}
-                        </tbody>
-                    </table>
+            {positions.length === 0 ? (
+                loading ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-5 w-1/2" />
+                        <Skeleton className="h-48 w-full" />
+                    </div>
+                ) : (
+                    <p className="text-gray-500 text-center py-8">No positions yet. Click "Add" to get started.</p>
+                )
+            ) : loading ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-5 w-1/2" />
+                    <Skeleton className="h-48 w-full" />
                 </div>
-            ) : positions.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No positions yet. Click "Add" to get started.</p>
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">

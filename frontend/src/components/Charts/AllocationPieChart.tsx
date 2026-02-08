@@ -26,7 +26,7 @@ const AllocationPieChart = ({ positions, loading = false }: { positions: Positio
         return <SkeletonChart height="400px" />;
     }
 
-    const pieData = positions.map((p) => ({ name: p.name, value: calcValue(p) }));
+    const pieData = positions.map((p) => ({ name: p.name || p.ticker, value: calcValue(p) }));
 
     return (
         <div className="bg-gray-800 rounded-lg p-4">
@@ -47,6 +47,7 @@ const AllocationPieChart = ({ positions, loading = false }: { positions: Positio
                             label={renderCustomLabel}
                             labelLine={{ stroke: '#9ca3af', strokeWidth: 1 }}
                             fill="#8884d8"
+                            isAnimationActive={false}
                         >
                             {positions.map((p, i) => (
                                 <Cell key={p.ticker} fill={getPositionColor(p, i)} />
