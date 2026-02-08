@@ -173,7 +173,7 @@ const PositionsTable = ({
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="text-gray-400 text-left">
-                                <th className="pb-2">Ticker</th>
+                                <th className="pb-2">Name</th>
                                 <th className="pb-2">Quantity</th>
                                 <th className="pb-2">Buy Price</th>
                                 <th className="pb-2">Current Price</th>
@@ -196,7 +196,7 @@ const PositionsTable = ({
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="text-gray-400 text-left">
-                                <th className="pb-2">Ticker</th>
+                                <th className="pb-2">Name</th>
                                 <th className="pb-2">Quantity</th>
                                 <th className="pb-2">Buy Price</th>
                                 <th className="pb-2">Current Price</th>

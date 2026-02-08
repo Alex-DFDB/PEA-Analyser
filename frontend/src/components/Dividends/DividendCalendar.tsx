@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Position } from "../../types";
 import type { DividendEvent } from "../../hooks/useDividends";
 import { formatDate } from "../../utils/date";
+import { SkeletonDividendCalendar } from "../common/Skeleton";
 
 /**
  * Color scheme constants for dividend yield visualization
@@ -191,15 +192,7 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
     }
 
     if (loading) {
-        return (
-            <div className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Dividend Calendar</h2>
-                </div>
-                <p className="text-gray-500 text-center py-8">Loading dividend data...</p>
-            </div>
-        );
+        return <SkeletonDividendCalendar />;
     }
 
     if (error) {
@@ -324,17 +317,19 @@ const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) =
                                         ? yieldsWithData.reduce((sum, d) => sum + (d.yield || 0), 0) / yieldsWithData.length
                                         : null;
 
+                                const position = positions.find((p) => p.ticker === div.ticker);
                                 return (
                                     <tr key={div.ticker} className="border-b border-gray-700/50">
-                                        <td className="py-2 pr-4 font-medium">{positions.find(p => p.ticker === div.ticker)?.name || div.ticker}</td>
-                                        <td className="py-2 pr-4 text-right">{div.dividends.length}</td>
-                                        <td className="py-2 pr-4 text-right">
-                                            {firstPayment ? formatDate(firstPayment) : "-"}
+                                        <td className="py-1 pr-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{position?.name || div.ticker}</span>
+                                                <span className="text-[10px] text-gray-400">{div.ticker}</span>
+                                            </div>
                                         </td>
-                                        <td className="py-2 pr-4 text-right">
-                                            {lastPayment ? formatDate(lastPayment) : "-"}
-                                        </td>
-                                        <td className="py-2 text-right text-blue-400 font-semibold">
+                                        <td className="py-1 pr-4 text-right">{div.dividends.length}</td>
+                                        <td className="py-1 pr-4 text-right">{firstPayment ? formatDate(firstPayment) : "-"}</td>
+                                        <td className="py-1 pr-4 text-right">{lastPayment ? formatDate(lastPayment) : "-"}</td>
+                                        <td className="py-1 text-right text-blue-400 font-semibold">
                                             {avgYield !== null ? `${avgYield.toFixed(2)}%` : "-"}
                                         </td>
                                     </tr>

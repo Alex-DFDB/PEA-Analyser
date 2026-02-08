@@ -1,6 +1,6 @@
 // App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AuthProvider } from "./auth/AuthContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import Navbar from "./components/Navigation/Navbar";
@@ -24,15 +24,44 @@ function AppContent() {
     const { positions, addPosition, deletePosition, setPositions, loading: positionsLoading } = usePositions();
     const { historicalReturns, historicalData, fetchHistoricalData, loading: historicalLoading } = useHistoricalData();
     const { updatePrices, loading: pricesLoading } = usePriceUpdate(positions, setPositions);
-    const dividendState = useDividends(positions);
+    const dividendState = useDividends(positions, false); // Disable auto-fetch, we'll manage it manually
+    const isRefreshingRef = useRef(false);
 
+    // Fetch historical and dividends in parallel when positions change
     useEffect(() => {
-        if (positions.length > 0) {
+        if (positions.length > 0 && !isRefreshingRef.current) {
             const tickers = positions.map((p) => p.ticker);
-            fetchHistoricalData(tickers);
+            // Launch both fetches in parallel
+            Promise.all([
+                fetchHistoricalData(tickers),
+                dividendState.fetchDividends(positions),
+            ]);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [positions.map(p => p.ticker).sort().join(',')]);
+
+    /**
+     * Refresh all data in parallel (quotes, historical, dividends)
+     */
+    const refreshAll = async () => {
+        if (positions.length === 0) return;
+
+        const tickers = positions.map((p) => p.ticker);
+
+        // Prevent the useEffect from triggering during manual refresh
+        isRefreshingRef.current = true;
+
+        try {
+            // Launch all fetches in parallel
+            await Promise.all([
+                updatePrices(),
+                fetchHistoricalData(tickers),
+                dividendState.fetchDividends(positions),
+            ]);
+        } finally {
+            isRefreshingRef.current = false;
+        }
+    };
 
     return (
         <Router>
@@ -57,9 +86,9 @@ function AppContent() {
                                             addPosition={addPosition}
                                             deletePosition={deletePosition}
                                             setPositions={setPositions}
-                                            updatePrices={updatePrices}
+                                            updatePrices={refreshAll}
                                             positionsLoading={positionsLoading}
-                                            pricesLoading={pricesLoading}
+                                            pricesLoading={pricesLoading || historicalLoading || dividendState.loading}
                                             historicalLoading={historicalLoading}
                                             historicalData={historicalData}
                                             historicalReturns={historicalReturns}

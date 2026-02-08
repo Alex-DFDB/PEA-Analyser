@@ -28,71 +28,74 @@ export type DividendEvent = {
 /**
  * Hook for fetching and managing dividend data for portfolio positions
  * @param positions Array of portfolio positions
+ * @param autoFetch Whether to automatically fetch dividends when positions change (default: true)
  * @returns Object containing dividend data, events, statistics, and helper functions
  */
-export function useDividends(positions: Position[]) {
+export function useDividends(positions: Position[], autoFetch = true) {
     const [dividendData, setDividendData] = useState<DividendData[]>([]);
     const [events, setEvents] = useState<DividendEvent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchDividends = async () => {
-            if (positions.length === 0) {
-                setDividendData([]);
-                setEvents([]);
-                setError(null);
-                return;
-            }
-
-            setLoading(true);
+    const fetchDividends = async (targetPositions: Position[] = positions) => {
+        if (targetPositions.length === 0) {
+            setDividendData([]);
+            setEvents([]);
             setError(null);
+            return;
+        }
 
-            try {
-                const tickers = positions.map((p) => p.ticker);
-                const response = await fetch(`${API_URL}/api/dividends`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ tickers }),
-                });
+        setLoading(true);
+        setError(null);
 
-                if (!response.ok) throw new Error("Dividends API error");
+        try {
+            const tickers = targetPositions.map((p) => p.ticker);
+            const response = await fetch(`${API_URL}/api/dividends`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tickers }),
+            });
 
-                const data: DividendData[] = await response.json();
-                setDividendData(data);
+            if (!response.ok) throw new Error("Dividends API error");
 
-                // Convert to events for the calendar
-                const allEvents: DividendEvent[] = [];
-                data.forEach((divData) => {
-                    const position = positions.find((p) => p.ticker === divData.ticker);
-                    if (!position || !divData.dividends) return;
+            const data: DividendData[] = await response.json();
+            setDividendData(data);
 
-                    divData.dividends.forEach((payment) => {
-                        allEvents.push({
-                            date: new Date(payment.date),
-                            ticker: divData.ticker,
-                            name: position.name || position.ticker,
-                            amount: payment.amount * position.quantity,
-                            yield: payment.yield,
-                            priceAtPayment: payment.priceAtPayment,
-                        });
+            // Convert to events for the calendar
+            const allEvents: DividendEvent[] = [];
+            data.forEach((divData) => {
+                const position = targetPositions.find((p) => p.ticker === divData.ticker);
+                if (!position || !divData.dividends) return;
+
+                divData.dividends.forEach((payment) => {
+                    allEvents.push({
+                        date: new Date(payment.date),
+                        ticker: divData.ticker,
+                        name: position.name || position.ticker,
+                        amount: payment.amount * position.quantity,
+                        yield: payment.yield,
+                        priceAtPayment: payment.priceAtPayment,
                     });
                 });
+            });
 
-                setEvents(allEvents);
-            } catch (err) {
-                const errorMessage =
-                    err instanceof Error ? err.message : "Error fetching dividends";
-                setError(errorMessage);
-                console.error("Error fetching dividends:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
+            setEvents(allEvents);
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error ? err.message : "Error fetching dividends";
+            setError(errorMessage);
+            console.error("Error fetching dividends:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchDividends();
+    useEffect(() => {
+        if (autoFetch) {
+            fetchDividends(positions);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [positions.map(p => p.ticker).sort().join(',')]);
+    }, [positions.map(p => p.ticker).sort().join(','), autoFetch]);
 
     // Calculate statistics from events
     const totalAmount = events.reduce((sum, e) => sum + e.amount, 0);
@@ -122,5 +125,6 @@ export function useDividends(positions: Position[]) {
         lastPaymentDate,
         getEventsByYear,
         getYearTotal,
+        fetchDividends,
     };
 }

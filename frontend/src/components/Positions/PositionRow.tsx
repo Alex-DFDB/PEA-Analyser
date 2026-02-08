@@ -15,7 +15,12 @@ const PositionRow = ({ position, onDelete }: { position: Position; onDelete: () 
 
     return (
         <tr className="border-t border-gray-700">
-            <td className="py-2 font-medium">{position.name || position.ticker}</td>
+            <td className="py-1">
+                <div className="flex flex-col">
+                    <span className="font-medium">{position.name || position.ticker}</span>
+                    <span className="text-xs text-gray-400">{position.ticker}</span>
+                </div>
+            </td>
             <td>{position.quantity}</td>
             <td>€{position.buyPrice.toFixed(2)}</td>
             <td>€{position.currentPrice.toFixed(2)}</td>
