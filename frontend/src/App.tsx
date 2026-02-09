@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import DividendsPage from "./pages/DividendsPage";
+import StockAnalysisPage from "./pages/StockAnalysisPage";
 import { usePositions } from "./hooks/usePositions";
 import { useHistoricalData } from "./hooks/useHistoricalData";
 import { usePriceUpdate } from "./hooks/usePriceUpdate";
@@ -107,6 +108,25 @@ function AppContent() {
                                     <Header />
                                     <div className="w-full">
                                         <DividendsPage positions={positions} dividendState={dividendState} />
+                                    </div>
+                                </main>
+                            </div>
+                        }
+                    />
+                    <Route
+                        path="/analysis"
+                        element={
+                            <div className="min-h-screen bg-gray-900 text-white p-6">
+                                <Navbar />
+                                <main className="ml-[280px]">
+                                    <Header />
+                                    <div className="w-full">
+                                        <StockAnalysisPage
+                                            positions={positions}
+                                            historicalData={historicalData}
+                                            historicalLoading={historicalLoading}
+                                            dividendState={dividendState}
+                                        />
                                     </div>
                                 </main>
                             </div>

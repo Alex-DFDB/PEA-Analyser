@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Wallet, BarChart3, Calendar, Home } from "lucide-react";
+import { Wallet, BarChart3, Calendar, Home, LineChart } from "lucide-react";
 
 /**
  * Navbar component provides side navigation for the application
@@ -23,6 +23,11 @@ const Navbar = () => {
             name: "Dividends",
             path: "/dividends",
             icon: Calendar,
+        },
+        {
+            name: "Analyse",
+            path: "/analysis",
+            icon: LineChart,
         },
     ];
 
