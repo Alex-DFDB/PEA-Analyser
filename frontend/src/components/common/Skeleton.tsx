@@ -5,7 +5,7 @@
  */
 const Skeleton = ({ className = "", style }: { className?: string; style?: React.CSSProperties }) => {
     return (
-        <div className={`animate-pulse bg-gray-700 rounded ${className}`} style={style}></div>
+        <div className={`animate-pulse rounded ${className}`} style={{ backgroundColor: "var(--cream-darker)", ...style }}></div>
     );
 };
 
@@ -21,7 +21,7 @@ export const SkeletonText = ({ width = "100%", height = "1rem" }: { width?: stri
  */
 export const SkeletonCard = ({ height = "120px" }: { height?: string }) => {
     return (
-        <div className="bg-gray-800 rounded-lg p-4" style={{ height }}>
+        <div className="pea-card" style={{ height, padding: "16px" }}>
             <div className="space-y-3">
                 <Skeleton className="h-4 w-1/3" />
                 <Skeleton className="h-8 w-2/3" />
@@ -35,7 +35,7 @@ export const SkeletonCard = ({ height = "120px" }: { height?: string }) => {
  */
 export const SkeletonChart = ({ height = "400px" }: { height?: string }) => {
     return (
-        <div className="bg-gray-800 rounded-lg p-4">
+        <div className="pea-card" style={{ padding: "16px" }}>
             <div className="mb-4">
                 <Skeleton className="h-5 w-1/2" />
             </div>
@@ -51,7 +51,7 @@ export const SkeletonChart = ({ height = "400px" }: { height?: string }) => {
  */
 export const SkeletonTableRow = () => {
     return (
-        <tr className="border-t border-gray-700">
+        <tr style={{ borderTop: "1px solid var(--cream-dark)" }}>
             <td className="py-2"><Skeleton className="h-4 w-16" /></td>
             <td><Skeleton className="h-4 w-12" /></td>
             <td><Skeleton className="h-4 w-16" /></td>
@@ -68,7 +68,7 @@ export const SkeletonTableRow = () => {
  */
 export const SkeletonDividendCalendar = () => {
     return (
-        <div className="bg-gray-800 rounded-lg p-4">
+        <div className="pea-card" style={{ padding: "16px" }}>
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export const SkeletonDividendCalendar = () => {
             {/* Summary cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-gray-700/50 rounded p-3">
+                    <div key={i} style={{ backgroundColor: "var(--cream)", borderRadius: "8px", padding: "12px" }}>
                         <Skeleton className="h-3 w-32 mb-2" />
                         <Skeleton className="h-6 w-24" />
                     </div>
@@ -92,12 +92,12 @@ export const SkeletonDividendCalendar = () => {
             </div>
 
             {/* Simplified calendar grid placeholder */}
-            <div className="bg-gray-700/30 rounded-lg p-8 mb-6">
+            <div style={{ backgroundColor: "var(--cream)", borderRadius: "8px", padding: "32px", marginBottom: "24px" }}>
                 <Skeleton className="h-64 w-full" />
             </div>
 
             {/* Simplified table */}
-            <div className="border-t border-gray-700 pt-4">
+            <div style={{ borderTop: "1px solid var(--cream-darker)", paddingTop: "16px" }}>
                 <Skeleton className="h-48 w-full" />
             </div>
         </div>

@@ -44,29 +44,61 @@ export const RegisterForm = () => {
         }
     };
 
+    const inputStyle: React.CSSProperties = {
+        width: "100%",
+        padding: "10px 12px",
+        backgroundColor: "var(--cream-dark)",
+        border: "1px solid var(--cream-darker)",
+        borderRadius: "8px",
+        fontSize: "13px",
+        fontFamily: "'Inter', sans-serif",
+        color: "var(--ink-soft)",
+        outline: "none",
+        boxSizing: "border-box",
+    };
+
+    const labelStyle: React.CSSProperties = {
+        display: "block",
+        fontSize: "11px",
+        fontWeight: 500,
+        letterSpacing: "1px",
+        textTransform: "uppercase",
+        color: "var(--muted)",
+        marginBottom: "6px",
+    };
+
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded">{error}</div>}
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {error && (
+                <div
+                    style={{
+                        backgroundColor: "rgba(139,58,58,0.08)",
+                        border: "1px solid rgba(139,58,58,0.3)",
+                        color: "var(--red)",
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                    }}
+                >
+                    {error}
+                </div>
+            )}
 
             <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">
-                    Email
-                </label>
+                <label htmlFor="email" style={labelStyle}>Email</label>
                 <input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your email"
+                    style={inputStyle}
+                    placeholder="Votre adresse email"
                 />
             </div>
 
             <div>
-                <label htmlFor="username" className="block text-sm font-medium mb-1">
-                    Username
-                </label>
+                <label htmlFor="username" style={labelStyle}>Nom d'utilisateur</label>
                 <input
                     id="username"
                     type="text"
@@ -75,15 +107,13 @@ export const RegisterForm = () => {
                     required
                     minLength={3}
                     maxLength={50}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Choose a username"
+                    style={inputStyle}
+                    placeholder="Choisissez un pseudonyme"
                 />
             </div>
 
             <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-1">
-                    Password
-                </label>
+                <label htmlFor="password" style={labelStyle}>Mot de passe</label>
                 <input
                     id="password"
                     type="password"
@@ -91,38 +121,51 @@ export const RegisterForm = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Choose a password (min 8 characters)"
+                    style={inputStyle}
+                    placeholder="Minimum 8 caractères"
                 />
             </div>
 
             <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
-                    Confirm Password
-                </label>
+                <label htmlFor="confirmPassword" style={labelStyle}>Confirmer le mot de passe</label>
                 <input
                     id="confirmPassword"
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Confirm your password"
+                    style={inputStyle}
+                    placeholder="Répétez votre mot de passe"
                 />
             </div>
 
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed py-2 rounded font-medium cursor-pointer"
+                style={{
+                    width: "100%",
+                    padding: "12px",
+                    backgroundColor: loading ? "var(--cream-darker)" : "var(--ink)",
+                    color: loading ? "var(--muted)" : "var(--gold)",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    fontFamily: "'Inter', sans-serif",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    marginTop: "4px",
+                }}
             >
-                {loading ? "Creating account..." : "Register"}
+                {loading ? "Création en cours..." : "Créer mon compte"}
             </button>
 
-            <p className="text-center text-sm text-gray-400">
-                Already have an account?{" "}
-                <Link to="/login" className="text-blue-500 hover:text-blue-400">
-                    Login here
+            <p style={{ textAlign: "center", fontSize: "12px", color: "var(--muted)", margin: 0 }}>
+                Déjà un compte ?{" "}
+                <Link
+                    to="/login"
+                    style={{ color: "var(--gold)", textDecoration: "none", fontWeight: 500 }}
+                >
+                    Se connecter
                 </Link>
             </p>
         </form>

@@ -70,16 +70,15 @@ Les dots sont aussi utilisés comme **éléments d'UI fonctionnels** :
 
 ## 4. Typographie
 
-| Famille            | Usage                              | Poids              |
-| ------------------ | ---------------------------------- | ------------------ |
-| `Playfair Display` | Valeurs KPI, logo, titres premium  | 500, 600           |
-| `Inter`            | Tout le reste (labels, corps, nav) | 300, 400, 500, 600 |
+| Famille | Usage         | Poids              |
+| ------- | ------------- | ------------------ |
+| `Inter` | Toute l'UI    | 300, 400, 500, 600 |
 
 ### Échelle typographique
 
-- Logo : `20px` Playfair
-- Titre de page : `28px` Playfair 500
-- Valeur KPI : `26px` Playfair 500
+- Logo : `20px` Inter 600
+- Titre de page : `28px` Inter 500
+- Valeur KPI : `26px` Inter 500
 - Titre de card : `14px` Inter 600
 - Corps / tableau : `13px` Inter 400
 - Labels / badges : `10–11px` Inter 500, `letter-spacing: 1–1.5px`, uppercase
@@ -108,7 +107,7 @@ Toujours avec `overflow: hidden`. Coin supérieur droit avec patch de dots micro
 ### KPI Cards (4 colonnes)
 
 - Label : `10px` uppercase muted
-- Valeur : Playfair `26px`
+- Valeur : Inter `26px` 500
 - Delta : `11px` avec flèche ▲▼ et couleur sémantique
 - Patch dots + halo doré en `::after` (pseudo-élément)
 
@@ -145,7 +144,7 @@ Toujours avec `overflow: hidden`. Coin supérieur droit avec patch de dots micro
 - Arc fond : `--cream-dark`
 - Arc actif : `--gold`
 - Dot filled à l'extrémité de l'arc actif
-- Score centré : Playfair `32px`
+- Score centré : Inter `32px` 500
 - Grille de métriques : 2×2, cards `--cream` avec label + valeur
 
 ### Sélecteur de période
@@ -184,7 +183,7 @@ Bouton actif : fond `--ink`, texte `--gold`, `font-weight: 500`.
 1. **Jamais de bleu** dans l'interface — rupture avec les codes fintech standards.
 2. **Jamais de shadow lourde** — au plus `box-shadow: 0 2px 8px rgba(0,0,0,0.06)`.
 3. **Dots toujours présents** mais jamais à plus de 30% d'opacité sur fond clair.
-4. **Playfair uniquement pour les chiffres et le logo** — pas dans les labels ou boutons.
+4. **Inter partout, sans exception** — police unique pour toute l'interface.
 5. **Border-radius : 14px** pour les cards, **8–10px** pour les éléments internes.
 6. Les badges/pills ont toujours `border-radius: 20px` (forme pilule).
 7. Toujours inclure un `letter-spacing` sur les labels uppercase.
@@ -192,16 +191,31 @@ Bouton actif : fond `--ink`, texte `--gold`, `font-weight: 500`.
 
 ---
 
-## 8. Pages prévues
+## 8. Pages
 
-| Page            | Description                                                              |
-| --------------- | ------------------------------------------------------------------------ |
-| `/ (Dashboard)` | Vue d'ensemble — KPIs, graphe, allocation, positions, dividendes, risque |
-| `/portfolio`    | Liste complète des positions avec filtres et tri                         |
-| `/performance`  | Analyse comparative vs indices (CAC 40, S&P 500…)                        |
-| `/dividendes`   | Calendrier, historique, rendement par ligne                              |
-| `/fiscalite`    | Suivi plafond PEA, plus-values réalisées, simulation                     |
-| `/alertes`      | Seuils de cours, objectifs, notifications                                |
+### Pages publiques (non authentifiées)
+
+| Route       | Composant        | Description                                      |
+| ----------- | ---------------- | ------------------------------------------------ |
+| `/`         | `HomePage`       | Landing page publique                            |
+| `/login`    | `LoginPage`      | Formulaire de connexion                          |
+| `/register` | `RegisterPage`   | Formulaire d'inscription                         |
+
+### Pages protégées (authentification requise)
+
+| Route        | Composant            | Description                                                              |
+| ------------ | -------------------- | ------------------------------------------------------------------------ |
+| `/portfolio` | `PortfolioPage`      | Positions, KPIs, graphes historiques, allocation, dividendes, projection |
+| `/dividends` | `DividendsPage`      | Calendrier, historique et rendement par ligne                            |
+| `/analysis`  | `StockAnalysisPage`  | Analyse détaillée par action — cours, évolution, dividendes              |
+
+### Pages à venir
+
+| Route         | Description                                                   |
+| ------------- | ------------------------------------------------------------- |
+| `/performance`| Analyse comparative vs indices (CAC 40, S&P 500…)             |
+| `/fiscalite`  | Suivi plafond PEA, plus-values réalisées, simulation          |
+| `/alertes`    | Seuils de cours, objectifs, notifications                     |
 
 ---
 
@@ -210,7 +224,7 @@ Bouton actif : fond `--ink`, texte `--gold`, `font-weight: 500`.
 - **Framework :** React + Vite
 - **Styling :** CSS variables + modules (pas de Tailwind — trop générique pour ce design)
 - **Graphes :** SVG natif ou Recharts avec theming custom
-- **Fonts :** Google Fonts — `Playfair Display` + `Inter`
+- **Fonts :** Google Fonts — `Inter` uniquement
 - **Icônes :** Unicode circles pour la nav, Lucide React pour les actions
 
 ---

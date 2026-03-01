@@ -1,7 +1,3 @@
-/**
- * ProjectionControls provides UI controls for projection settings
- * Allows users to adjust projection years and toggle between detailed/total views
- */
 const ProjectionControls = ({
     years,
     onYearsChange,
@@ -16,26 +12,47 @@ const ProjectionControls = ({
     hasData: boolean;
 }) => {
     return (
-        <div className="flex gap-4 text-sm items-center">
-            <label className="flex items-center gap-2">
-                <span className="text-gray-400">Years:</span>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span className="pea-label">Années</span>
                 <input
                     type="number"
                     value={years}
                     onChange={(e) => onYearsChange(Number(e.target.value))}
-                    className="bg-gray-700 rounded px-2 py-1 w-16"
                     min={1}
                     max={30}
+                    style={{
+                        backgroundColor: "var(--cream-dark)",
+                        border: "1px solid var(--cream-darker)",
+                        borderRadius: "8px",
+                        padding: "4px 8px",
+                        width: "56px",
+                        fontSize: "13px",
+                        color: "var(--ink)",
+                        outline: "none",
+                    }}
                 />
             </label>
-            <div className="text-gray-400 text-xs">
-                {hasData ? "Based on 5-year historical data" : "Click 'Refresh Prices' to load data"}
-            </div>
+            {!hasData && (
+                <span style={{ fontSize: "11px", color: "var(--muted)" }}>
+                    Cliquez sur « Actualiser » pour charger les données
+                </span>
+            )}
             <button
                 onClick={onViewToggle}
-                className={`px-3 py-1 rounded text-sm ${detailedView ? "bg-blue-600" : "bg-gray-600"} hover:opacity-80 cursor-pointer`}
+                style={{
+                    padding: "5px 12px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    border: "1px solid var(--cream-darker)",
+                    backgroundColor: detailedView ? "var(--ink)" : "white",
+                    color: detailedView ? "var(--gold)" : "var(--muted)",
+                    transition: "all 0.15s ease",
+                }}
             >
-                {detailedView ? "Detailed View" : "Total View"}
+                {detailedView ? "Vue détaillée" : "Vue totale"}
             </button>
         </div>
     );

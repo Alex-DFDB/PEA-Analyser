@@ -1,25 +1,27 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from "recharts";
-import { TrendingUp } from "lucide-react";
 
 import type { Position } from "../../types";
 import { getPositionColor } from "../../utils/colors";
 import { formatDate } from "../../utils/date";
 import { SkeletonChart } from "../common/Skeleton";
 
-/**
- * Custom tooltip component for displaying performance data
- */
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 shadow-lg max-w-xs">
-                <p className="text-sm font-semibold text-white mb-2">
+            <div style={{
+                background: "white",
+                border: "1px solid var(--cream-darker)",
+                borderRadius: "10px",
+                padding: "10px 14px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}>
+                <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--muted)", letterSpacing: "0.5px", marginBottom: "6px" }}>
                     {formatDate(new Date(label))}
                 </p>
                 {payload.map((entry: any, index: number) => (
-                    <div key={index} className="text-xs flex justify-between gap-3 py-0.5">
-                        <span style={{ color: entry.color }}>{entry.name}:</span>
-                        <span className="font-semibold text-white">{entry.value.toFixed(2)}%</span>
+                    <div key={index} style={{ display: "flex", justifyContent: "space-between", gap: "16px", fontSize: "12px", padding: "2px 0" }}>
+                        <span style={{ color: entry.color }}>{entry.name}</span>
+                        <span style={{ fontWeight: 600, color: "var(--ink)" }}>{entry.value.toFixed(2)}%</span>
                     </div>
                 ))}
             </div>
@@ -28,13 +30,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-/**
- * HistoricalPerformanceChart displays the historical performance of positions over 5 years
- * Each line shows the percentage change relative to the first data point
- * @param positions - Array of portfolio positions
- * @param historicalData - Historical price data for each ticker
- * @param loading - Loading state for historical data
- */
 const HistoricalPerformanceChart = ({
     positions,
     historicalData,
@@ -46,14 +41,9 @@ const HistoricalPerformanceChart = ({
 }) => {
     if (positions.length === 0) return null;
 
-    /**
-     * Prepares historical data for the chart by normalizing prices to percentage changes
-     * @returns Array of data points with date and percentage changes for each position
-     */
     const prepareHistoricalChartData = () => {
         if (Object.keys(historicalData).length === 0) return [];
 
-        // Collect all unique dates from all positions
         const allDates = new Set<string>();
         Object.values(historicalData).forEach((data) => {
             data.forEach((point) => allDates.add(point.Date));
@@ -61,7 +51,6 @@ const HistoricalPerformanceChart = ({
 
         const sortedDates = Array.from(allDates).sort();
 
-        // Calculate percentage change for each position at each date
         return sortedDates.map((date) => {
             const dataPoint: any = { date };
 
@@ -87,24 +76,29 @@ const HistoricalPerformanceChart = ({
     }
 
     return (
-        <div className="bg-gray-800 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
-                <h2 className="font-semibold">Historical Performance (5 Years)</h2>
-            </div>
+        <div className="pea-card" style={{ padding: "24px" }}>
+            <h2 style={{ margin: "0 0 20px", fontSize: "14px", fontWeight: 600, color: "var(--ink)" }}>
+                Performance historique (5 ans)
+            </h2>
             {historicalChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={400}>
+                <ResponsiveContainer width="100%" height={320}>
                     <LineChart data={historicalChartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <CartesianGrid strokeDasharray="2,8" stroke="rgba(196,168,106,0.3)" />
                         <XAxis
                             dataKey="date"
                             tickFormatter={(date) => new Date(date).getFullYear().toString()}
-                            stroke="#9ca3af"
-                            fontSize={12}
+                            tick={{ fill: "var(--muted)", fontSize: 11 }}
+                            axisLine={false}
+                            tickLine={false}
                         />
-                        <YAxis tickFormatter={(v) => `${v.toFixed(0)}%`} stroke="#9ca3af" fontSize={12} />
+                        <YAxis
+                            tickFormatter={(v) => `${v.toFixed(0)}%`}
+                            tick={{ fill: "var(--muted)", fontSize: 11 }}
+                            axisLine={false}
+                            tickLine={false}
+                        />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: "11px", color: "var(--muted)", paddingTop: "12px" }} />
                         {positions.map((p, i) => (
                             <Line
                                 key={p.ticker}
@@ -113,13 +107,15 @@ const HistoricalPerformanceChart = ({
                                 stroke={getPositionColor(p, i)}
                                 strokeWidth={2}
                                 dot={false}
-                                name={p.name}
+                                name={p.name || p.ticker}
                             />
                         ))}
                     </LineChart>
                 </ResponsiveContainer>
             ) : (
-                <p className="text-gray-500 text-center py-8">Click "Refresh" to load historical data</p>
+                <p style={{ color: "var(--muted)", textAlign: "center", padding: "32px 0", fontSize: "13px" }}>
+                    Cliquez sur « Actualiser » pour charger les données historiques
+                </p>
             )}
         </div>
     );

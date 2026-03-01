@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Activity, Percent } from "lucide-react";
 import StockAreaChart from "../components/Charts/StockAreaChart";
 import type { Position } from "../types";
 
@@ -87,185 +86,193 @@ const StockAnalysisPage = ({
         };
     }, [selectedPosition, selectedHistoricalData, dividendState]);
 
+    const cardStyle: React.CSSProperties = {
+        backgroundColor: "white",
+        borderRadius: "14px",
+        border: "1px solid var(--cream-darker)",
+        padding: "20px 24px",
+        overflow: "hidden",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+    };
+
+    const rowStyle: React.CSSProperties = {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "8px 0",
+        borderBottom: "1px solid var(--cream-dark)",
+        fontSize: "13px",
+    };
+
     if (positions.length === 0) {
         return (
-            <div className="text-center py-12">
-                <p className="text-gray-400">Aucune position dans votre portefeuille</p>
+            <div style={{ textAlign: "center", padding: "48px 0" }}>
+                <p style={{ color: "var(--muted)", fontSize: "13px" }}>
+                    Aucune position dans votre portefeuille.
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header with stock selector */}
-            <div className="bg-gray-800 rounded-lg p-6">
-                <h1 className="text-2xl font-bold mb-4">Analyse par Action</h1>
-                <div className="flex items-center gap-4">
-                    <label htmlFor="stock-selector" className="text-sm font-medium text-gray-300">
-                        Sélectionner une action:
-                    </label>
-                    <select
-                        id="stock-selector"
-                        value={selectedTicker}
-                        onChange={(e) => setSelectedTicker(e.target.value)}
-                        className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 min-w-[250px]"
-                    >
-                        {positions.map((position) => (
-                            <option key={position.ticker} value={position.ticker}>
-                                {position.name || position.ticker} ({position.ticker})
-                            </option>
-                        ))}
-                    </select>
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* Sélecteur d'action */}
+            <div className="pea-card" style={{ padding: "24px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <h1 style={{ fontSize: "22px", fontWeight: 500, color: "var(--ink)", margin: 0 }}>
+                        Analyse par Action
+                    </h1>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <label
+                            htmlFor="stock-selector"
+                            className="pea-label"
+                        >
+                            Action
+                        </label>
+                        <select
+                            id="stock-selector"
+                            value={selectedTicker}
+                            onChange={(e) => setSelectedTicker(e.target.value)}
+                            style={{
+                                backgroundColor: "var(--cream-dark)",
+                                border: "1px solid var(--cream-darker)",
+                                borderRadius: "8px",
+                                padding: "8px 12px",
+                                fontSize: "13px",
+                                color: "var(--ink-soft)",
+                                outline: "none",
+                                minWidth: "220px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            {positions.map((position) => (
+                                <option key={position.ticker} value={position.ticker}>
+                                    {position.name || position.ticker} ({position.ticker})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 
             {selectedPosition && metrics && (
                 <>
-                    {/* Key Metrics Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Current Price */}
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <DollarSign className="w-4 h-4 text-blue-400" />
-                                <span className="text-sm text-gray-400">Prix Actuel</span>
+                    {/* KPI Cards */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+                        {/* Prix actuel */}
+                        <div className="pea-card pea-card-dots" style={{ padding: "20px 24px", position: "relative" }}>
+                            <p className="pea-label" style={{ marginBottom: "8px" }}>Prix Actuel</p>
+                            <div style={{ fontSize: "22px", fontWeight: 500, color: "var(--ink)" }}>
+                                {selectedPosition.currentPrice.toFixed(2)} €
                             </div>
-                            <div className="text-2xl font-bold">{selectedPosition.currentPrice.toFixed(2)} €</div>
                             <div
-                                className={`text-sm mt-1 flex items-center gap-1 ${
-                                    metrics.changePercent >= 0 ? "text-green-400" : "text-red-400"
-                                }`}
+                                className={`pea-badge ${metrics.changePercent >= 0 ? "pea-badge-green" : "pea-badge-red"}`}
+                                style={{ marginTop: "8px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                             >
-                                {metrics.changePercent >= 0 ? (
-                                    <TrendingUp className="w-4 h-4" />
-                                ) : (
-                                    <TrendingDown className="w-4 h-4" />
-                                )}
-                                {metrics.changePercent.toFixed(2)}% (5 ans)
+                                {metrics.changePercent >= 0 ? "▲" : "▼"} {metrics.changePercent.toFixed(2)}% (5 ans)
                             </div>
                         </div>
 
-                        {/* Position Gain/Loss */}
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Activity className="w-4 h-4 text-blue-400" />
-                                <span className="text-sm text-gray-400">Plus/Moins Value</span>
+                        {/* Plus-value position */}
+                        <div className="pea-card pea-card-dots" style={{ padding: "20px 24px", position: "relative" }}>
+                            <p className="pea-label" style={{ marginBottom: "8px" }}>Plus-value Position</p>
+                            <div style={{ fontSize: "22px", fontWeight: 500, color: metrics.positionGain >= 0 ? "var(--green)" : "var(--red)" }}>
+                                {metrics.positionGain >= 0 ? "+" : ""}{metrics.positionGain.toFixed(2)} €
                             </div>
                             <div
-                                className={`text-2xl font-bold ${
-                                    metrics.positionGain >= 0 ? "text-green-400" : "text-red-400"
-                                }`}
+                                className={`pea-badge ${metrics.positionGainPercent >= 0 ? "pea-badge-green" : "pea-badge-red"}`}
+                                style={{ marginTop: "8px", display: "inline-flex", alignItems: "center", gap: "3px" }}
                             >
-                                {metrics.positionGain >= 0 ? "+" : ""}
-                                {metrics.positionGain.toFixed(2)} €
-                            </div>
-                            <div
-                                className={`text-sm mt-1 ${
-                                    metrics.positionGainPercent >= 0 ? "text-green-400" : "text-red-400"
-                                }`}
-                            >
-                                {metrics.positionGainPercent >= 0 ? "+" : ""}
-                                {metrics.positionGainPercent.toFixed(2)}%
+                                {metrics.positionGainPercent >= 0 ? "▲" : "▼"} {metrics.positionGainPercent >= 0 ? "+" : ""}{metrics.positionGainPercent.toFixed(2)}%
                             </div>
                         </div>
 
-                        {/* 52 Week Range */}
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <TrendingUp className="w-4 h-4 text-blue-400" />
-                                <span className="text-sm text-gray-400">Range 52 Semaines</span>
+                        {/* Range 52 semaines */}
+                        <div className="pea-card pea-card-dots" style={{ padding: "20px 24px", position: "relative" }}>
+                            <p className="pea-label" style={{ marginBottom: "8px" }}>Range 52 Semaines</p>
+                            <div style={{ fontSize: "15px", fontWeight: 500, color: "var(--ink)" }}>
+                                {metrics.low52Week.toFixed(2)} – {metrics.high52Week.toFixed(2)} €
                             </div>
-                            <div className="text-lg font-semibold">
-                                {metrics.low52Week.toFixed(2)} € - {metrics.high52Week.toFixed(2)} €
-                            </div>
-                            <div className="text-xs text-gray-400 mt-1">
-                                Position:{" "}
-                                {(
+                            <div style={{ marginTop: "8px", fontSize: "11px", color: "var(--muted)" }}>
+                                Position : {(
                                     ((selectedPosition.currentPrice - metrics.low52Week) /
-                                        (metrics.high52Week - metrics.low52Week)) *
-                                    100
-                                ).toFixed(0)}
-                                %
+                                        (metrics.high52Week - metrics.low52Week)) * 100
+                                ).toFixed(0)}%
                             </div>
                         </div>
 
-                        {/* Dividend Yield */}
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Percent className="w-4 h-4 text-blue-400" />
-                                <span className="text-sm text-gray-400">Rendement Dividendes</span>
-                            </div>
-                            <div className="text-2xl font-bold">
+                        {/* Rendement dividendes */}
+                        <div className="pea-card pea-card-dots" style={{ padding: "20px 24px", position: "relative" }}>
+                            <p className="pea-label" style={{ marginBottom: "8px" }}>Rendement Dividendes</p>
+                            <div style={{ fontSize: "22px", fontWeight: 500, color: "var(--ink)" }}>
                                 {metrics.dividendYield > 0 ? `${metrics.dividendYield.toFixed(2)}%` : "N/A"}
                             </div>
-                            <div className="text-sm text-gray-400 mt-1">
+                            <div style={{ marginTop: "8px", fontSize: "11px", color: "var(--muted)" }}>
                                 {metrics.annualDividend > 0
                                     ? `${metrics.annualDividend.toFixed(2)} € / an`
-                                    : "Pas de dividendes"}
+                                    : "Aucun dividende"}
                             </div>
                         </div>
                     </div>
 
-                    {/* Position Details */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-400" />
+                    {/* Détails + Stats */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                        <div style={cardStyle}>
+                            <h3 style={{ fontSize: "14px", fontWeight: 600, color: "var(--ink)", margin: "0 0 16px" }}>
                                 Détails de la Position
                             </h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Quantité:</span>
-                                    <span className="font-semibold">{selectedPosition.quantity}</span>
+                            <div>
+                                <div style={rowStyle}>
+                                    <span style={{ color: "var(--muted)" }}>Quantité</span>
+                                    <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{selectedPosition.quantity}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Prix d'Achat:</span>
-                                    <span className="font-semibold">{selectedPosition.buyPrice.toFixed(2)} €</span>
+                                <div style={rowStyle}>
+                                    <span style={{ color: "var(--muted)" }}>Prix d'achat</span>
+                                    <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{selectedPosition.buyPrice.toFixed(2)} €</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Investissement Total:</span>
-                                    <span className="font-semibold">{metrics.totalInvested.toFixed(2)} €</span>
+                                <div style={rowStyle}>
+                                    <span style={{ color: "var(--muted)" }}>Investi total</span>
+                                    <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{metrics.totalInvested.toFixed(2)} €</span>
                                 </div>
-                                <div className="flex justify-between border-t border-gray-700 pt-2 mt-2">
-                                    <span className="text-gray-400">Valeur Actuelle:</span>
-                                    <span className="font-bold text-lg">{metrics.totalValue.toFixed(2)} €</span>
+                                <div style={{ ...rowStyle, borderBottom: "none", paddingTop: "12px", marginTop: "4px", borderTop: "1px solid var(--cream-darker)" }}>
+                                    <span style={{ color: "var(--muted)" }}>Valeur actuelle</span>
+                                    <span style={{ fontSize: "16px", fontWeight: 500, color: "var(--ink)" }}>
+                                        {metrics.totalValue.toFixed(2)} €
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-blue-400" />
+                        <div style={cardStyle}>
+                            <h3 style={{ fontSize: "14px", fontWeight: 600, color: "var(--ink)", margin: "0 0 16px" }}>
                                 Statistiques de Trading
                             </h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Volume Moyen (30j):</span>
-                                    <span className="font-semibold">{metrics.avgVolume.toLocaleString("fr-FR")}</span>
+                            <div>
+                                <div style={rowStyle}>
+                                    <span style={{ color: "var(--muted)" }}>Volume moyen (30j)</span>
+                                    <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{metrics.avgVolume.toLocaleString("fr-FR")}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Plus Haut 52 Semaines:</span>
-                                    <span className="font-semibold">{metrics.high52Week.toFixed(2)} €</span>
+                                <div style={rowStyle}>
+                                    <span style={{ color: "var(--muted)" }}>Plus haut 52 sem.</span>
+                                    <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{metrics.high52Week.toFixed(2)} €</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Plus Bas 52 Semaines:</span>
-                                    <span className="font-semibold">{metrics.low52Week.toFixed(2)} €</span>
+                                <div style={rowStyle}>
+                                    <span style={{ color: "var(--muted)" }}>Plus bas 52 sem.</span>
+                                    <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{metrics.low52Week.toFixed(2)} €</span>
                                 </div>
-                                <div className="flex justify-between border-t border-gray-700 pt-2 mt-2">
-                                    <span className="text-gray-400">Performance 5 Ans:</span>
+                                <div style={{ ...rowStyle, borderBottom: "none", paddingTop: "12px", marginTop: "4px", borderTop: "1px solid var(--cream-darker)" }}>
+                                    <span style={{ color: "var(--muted)" }}>Performance 5 ans</span>
                                     <span
-                                        className={`font-bold ${
-                                            metrics.changePercent >= 0 ? "text-green-400" : "text-red-400"
-                                        }`}
+                                        className={`pea-badge ${metrics.changePercent >= 0 ? "pea-badge-green" : "pea-badge-red"}`}
                                     >
-                                        {metrics.changePercent >= 0 ? "+" : ""}
-                                        {metrics.changePercent.toFixed(2)}%
+                                        {metrics.changePercent >= 0 ? "▲ +" : "▼ "}{metrics.changePercent.toFixed(2)}%
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Price Chart */}
+                    {/* Graphe */}
                     <StockAreaChart
                         ticker={selectedPosition.ticker}
                         name={selectedPosition.name || selectedPosition.ticker}

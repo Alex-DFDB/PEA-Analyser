@@ -19,8 +19,8 @@
     },
     {
         "ticker": "8TI",
-        "quantity": 170,
-        "buyPrice": 9.17,
+        "quantity": 185,
+        "buyPrice": 8.98,
         "color": "#8b5cf6"
     },
     {
@@ -55,8 +55,8 @@
     },
     {
         "ticker": "FSE",
-        "quantity": 30,
-        "buyPrice": 8.29,
+        "quantity": 60,
+        "buyPrice": 7.67,
         "color": "#0ea5e9"
     },
     {
@@ -64,5 +64,17 @@
         "quantity": 35,
         "buyPrice": 13.83,
         "color": "#00387b"
+    },
+    {
+        "ticker": "8ZI",
+        "quantity": 35,
+        "buyPrice": 13.47,
+        "color": "#C5C5C5"
+    },
+    {
+        "ticker": "AB2",
+        "quantity": 25,
+        "buyPrice": 28.92,
+        "color": "#009488"
     }
 ]

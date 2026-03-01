@@ -1,84 +1,133 @@
 import { Link, useLocation } from "react-router-dom";
-import { Wallet, BarChart3, Calendar, Home, LineChart } from "lucide-react";
 
-/**
- * Navbar component provides side navigation for the application
- * Displays active state for current route
- */
+const navigation = [
+    { name: "Portfolio",  path: "/portfolio", icon: "◈" },
+    { name: "Dividendes", path: "/dividends",  icon: "◉" },
+    { name: "Analyse",    path: "/analysis",   icon: "◎" },
+];
+
 const Navbar = () => {
     const location = useLocation();
-
-    const navigation = [
-        {
-            name: "Home",
-            path: "/",
-            icon: Home,
-        },
-        {
-            name: "Portfolio",
-            path: "/portfolio",
-            icon: BarChart3,
-        },
-        {
-            name: "Dividends",
-            path: "/dividends",
-            icon: Calendar,
-        },
-        {
-            name: "Analyse",
-            path: "/analysis",
-            icon: LineChart,
-        },
-    ];
-
-    /**
-     * Checks if the given path matches the current location
-     * @param path - Route path to check
-     * @returns True if path is active
-     */
-    const isActive = (path: string) => {
-        return location.pathname === path;
-    };
+    const isActive = (path: string) => location.pathname === path;
 
     return (
-        <>
-            <aside className="fixed left-6 top-6 bottom-6 w-64 bg-gray-800 rounded-lg z-50 flex flex-col shadow-2xl">
-                <div className="flex items-center gap-3 p-6 border-b border-gray-700">
-                    <Wallet className="w-8 h-8 text-blue-400" />
-                    <h1 className="text-xl font-bold">PEA Tracker</h1>
+        <aside
+            style={{
+                position: "fixed",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: "220px",
+                backgroundColor: "var(--ink)",
+                backgroundImage: "radial-gradient(var(--gold) 1px, transparent 1px)",
+                backgroundSize: "18px 18px",
+                zIndex: 50,
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
+            {/* Logo */}
+            <div
+                style={{
+                    padding: "28px 24px 24px",
+                    borderBottom: "1px solid rgba(196,168,106,0.15)",
+                }}
+            >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ color: "var(--gold)", fontSize: "18px" }}>⊙</span>
+                    <span
+                        style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: "16px",
+                            fontWeight: 500,
+                            color: "white",
+                            letterSpacing: "0.5px",
+                        }}
+                    >
+                        PEA·ANALYSER
+                    </span>
                 </div>
+            </div>
 
-                <nav className="flex-1 p-4 overflow-y-auto">
-                    <ul className="space-y-2">
-                        {navigation.map((item) => {
-                            const Icon = item.icon;
-                            return (
-                                <li key={item.path}>
-                                    <Link
-                                        to={item.path}
-                                        className={`
-                                            flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                                            ${
-                                                isActive(item.path)
-                                                    ? "bg-blue-600 text-white"
-                                                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                                            }
-                                        `}
-                                    >
-                                        <Icon className="w-5 h-5" />
-                                        <span className="font-medium">{item.name}</span>
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </nav>
+            {/* Navigation */}
+            <nav style={{ flex: 1, padding: "16px 12px", overflowY: "auto" }}>
+                <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "4px" }}>
+                    {navigation.map((item) => {
+                        const active = isActive(item.path);
+                        return (
+                            <li key={item.path}>
+                                <Link
+                                    to={item.path}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        padding: "10px 12px",
+                                        borderRadius: "8px",
+                                        textDecoration: "none",
+                                        fontFamily: "'Inter', sans-serif",
+                                        fontSize: "13px",
+                                        fontWeight: active ? 500 : 400,
+                                        color: active ? "var(--gold)" : "var(--muted)",
+                                        backgroundColor: active ? "rgba(196,168,106,0.12)" : "transparent",
+                                        transition: "all 0.15s ease",
+                                        position: "relative",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!active) {
+                                            (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(196,168,106,0.08)";
+                                            (e.currentTarget as HTMLElement).style.color = "var(--gold-light)";
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!active) {
+                                            (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                                            (e.currentTarget as HTMLElement).style.color = "var(--muted)";
+                                        }
+                                    }}
+                                >
+                                    <span style={{ fontSize: "15px", lineHeight: 1 }}>{item.icon}</span>
+                                    <span>{item.name}</span>
+                                    {active && (
+                                        <span
+                                            style={{
+                                                marginLeft: "auto",
+                                                width: "6px",
+                                                height: "6px",
+                                                borderRadius: "50%",
+                                                backgroundColor: "var(--gold)",
+                                                flexShrink: 0,
+                                            }}
+                                        />
+                                    )}
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </nav>
 
-                <div className="p-4 border-t border-gray-700">
-                    <p className="text-xs text-gray-400 text-center">v1.0.0</p>
-                </div>
-            </aside>
-        </>
+            {/* Footer */}
+            <div
+                style={{
+                    padding: "16px 24px",
+                    borderTop: "1px solid rgba(196,168,106,0.15)",
+                }}
+            >
+                <p
+                    style={{
+                        margin: 0,
+                        fontSize: "10px",
+                        fontWeight: 500,
+                        letterSpacing: "1.5px",
+                        textTransform: "uppercase",
+                        color: "rgba(138,128,112,0.6)",
+                    }}
+                >
+                    v1.0.0
+                </p>
+            </div>
+        </aside>
     );
 };
 

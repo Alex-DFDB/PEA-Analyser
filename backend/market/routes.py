@@ -102,7 +102,8 @@ async def get_quote(ticker: str):
             "ticker": ticker.upper(),
             "currentPrice": float(current_price),
             "dividendYield": dividend_yield,
-            "name": info.get('longName', info.get('shortName', ticker))
+            "name": info.get('longName', info.get('shortName', ticker)),
+            "sector": info.get('sector', None)
         }
     except HTTPException:
         raise
@@ -138,7 +139,8 @@ async def get_quotes(request: TickerRequest):
                     "ticker": ticker.upper(),
                     "currentPrice": float(current_price),
                     "dividendYield": dividend_yield,
-                    "name": info.get('longName', info.get('shortName', ticker))
+                    "name": info.get('longName', info.get('shortName', ticker)),
+                    "sector": info.get('sector', None)
                 })
             else:
                 results.append({

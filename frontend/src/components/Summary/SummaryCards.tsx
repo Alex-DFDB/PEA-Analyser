@@ -1,47 +1,43 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
-
 import type { Position } from "../../types";
 import { calculateTotals } from "../../utils/calculations";
 import SummaryCard from "./SummaryCard";
 import { SkeletonCard } from "../common/Skeleton";
 
-/**
- * SummaryCards displays key portfolio metrics in a card layout
- * Shows total value, invested amount, and profit/loss with visual indicators
- */
 const SummaryCards = ({ positions, loading = false }: { positions: Position[]; loading?: boolean }) => {
     const { totalValue, totalInvested, totalPV, totalPVPercent } = calculateTotals(positions);
 
     if (loading) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "24px" }}>
                 {[1, 2, 3].map((i) => (
-                    <SkeletonCard key={i} height="120px" />
+                    <SkeletonCard key={i} height="110px" />
                 ))}
             </div>
         );
     }
 
+    const pvPositive = totalPV >= 0;
+    const pvSign = pvPositive ? "+" : "";
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "32px" }}>
             <SummaryCard
-                label="Total Portfolio Value"
-                value={<p className="text-2xl font-bold">{totalValue.toFixed(2)}€</p>}
+                label="Valeur totale"
+                value={<>{totalValue.toFixed(2)} €</>}
             />
             <SummaryCard
-                label="Total Invested"
-                value={<p className="text-2xl font-bold">{totalInvested.toFixed(2)}€</p>}
+                label="Investi"
+                value={<>{totalInvested.toFixed(2)} €</>}
             />
             <SummaryCard
-                label="Profit/Loss"
-                trend={
-                    totalPV >= 0 ? <TrendingUp className="text-green-400" /> : <TrendingDown className="text-red-400" />
-                }
+                label="Plus-value"
                 value={
-                    <p className={`text-2xl font-bold ${totalPV >= 0 ? "text-green-400" : "text-red-400"}`}>
-                        {totalPV >= 0 ? "+" : ""}{totalPV.toFixed(2)}€ ({totalPVPercent.toFixed(2)}%)
-                    </p>
+                    <span style={{ color: pvPositive ? "var(--green)" : "var(--red)" }}>
+                        {pvSign}{totalPV.toFixed(2)} €
+                    </span>
                 }
+                delta={`${pvSign}${totalPVPercent.toFixed(2)}%`}
+                deltaPositive={pvPositive}
             />
         </div>
     );

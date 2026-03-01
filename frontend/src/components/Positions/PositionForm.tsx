@@ -37,43 +37,73 @@ const PositionForm = ({
         setForm({ ticker: "", quantity: "", buyPrice: "", color: "" });
     };
 
+    const inputStyle: React.CSSProperties = {
+        backgroundColor: "var(--cream-dark)",
+        border: "1px solid var(--cream-darker)",
+        borderRadius: "8px",
+        padding: "8px 12px",
+        fontSize: "13px",
+        fontFamily: "'Inter', sans-serif",
+        color: "var(--ink-soft)",
+        outline: "none",
+        width: "100%",
+    };
+
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+        <div
+            style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: "8px",
+                marginBottom: "20px",
+                padding: "16px",
+                backgroundColor: "var(--cream)",
+                borderRadius: "10px",
+                border: "1px solid var(--cream-darker)",
+            }}
+        >
             <input
-                placeholder="Ticker"
+                placeholder="Ticker (ex: MC.PA)"
                 value={form.ticker}
                 onChange={(e) => setForm({ ...form, ticker: e.target.value })}
-                className="bg-gray-700 rounded px-3 py-2 text-sm"
+                style={inputStyle}
                 disabled={loading}
             />
             <input
-                placeholder="Quantity"
+                placeholder="Quantité"
                 type="number"
                 value={form.quantity}
                 onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                className="bg-gray-700 rounded px-3 py-2 text-sm"
+                style={inputStyle}
                 disabled={loading}
             />
             <input
-                placeholder="Buy price (€)"
+                placeholder="Prix d'achat (€)"
                 type="number"
                 value={form.buyPrice}
                 onChange={(e) => setForm({ ...form, buyPrice: e.target.value })}
-                className="bg-gray-700 rounded px-3 py-2 text-sm"
+                style={inputStyle}
                 disabled={loading}
             />
-            <div className="flex gap-2 items-center">
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                 <input
                     type="color"
-                    value={form.color || "#3b82f6"}
+                    value={form.color || "#C4A86A"}
                     onChange={(e) => setForm({ ...form, color: e.target.value })}
-                    className="w-10 h-8 bg-gray-700 rounded cursor-pointer"
+                    style={{ width: "40px", height: "36px", borderRadius: "6px", cursor: "pointer", border: "1px solid var(--cream-darker)" }}
                     disabled={loading}
-                    title="Color"
+                    title="Couleur"
                 />
                 <button
                     onClick={() => setForm({ ...form, color: "" })}
-                    className="text-xs text-gray-400 hover:text-white cursor-pointer"
+                    style={{
+                        fontSize: "11px",
+                        color: "var(--muted)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        fontFamily: "'Inter', sans-serif",
+                    }}
                     disabled={loading}
                 >
                     Auto
@@ -82,9 +112,20 @@ const PositionForm = ({
             <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="col-span-2 md:col-span-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded py-2 text-sm cursor-pointer"
+                style={{
+                    gridColumn: "span 4",
+                    backgroundColor: loading ? "var(--cream-darker)" : "var(--ink)",
+                    color: loading ? "var(--muted)" : "var(--gold)",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    fontFamily: "'Inter', sans-serif",
+                    cursor: loading ? "not-allowed" : "pointer",
+                }}
             >
-                {loading ? "Adding Position..." : "Add Position"}
+                {loading ? "Ajout en cours..." : "Ajouter la position"}
             </button>
         </div>
     );

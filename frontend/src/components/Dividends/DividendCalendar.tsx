@@ -7,21 +7,22 @@ import { SkeletonDividendCalendar } from "../common/Skeleton";
 import DividendMonthlyBarChart from "../Charts/DividendMonthlyBarChart";
 
 /**
- * Color scheme constants for dividend yield visualization
- * Uses HSL color space to create a gradient from light to dark orange based on yield intensity
+ * Color scheme for dividend yield visualization.
+ * Uses gold-family HSL colors aligned with the design system.
  */
 const COLOR_CONSTANTS = {
-    NO_DIVIDEND: "#1f2937",
-    ORANGE_HUE: 25,
-    BASE_SATURATION: 70,
-    MAX_SATURATION: 100,
-    BASE_LIGHTNESS: 65,
-    MIN_LIGHTNESS: 30,
+    NO_DIVIDEND: "transparent",
+    GOLD_HUE: 38,
+    BASE_SATURATION: 45,
+    MAX_SATURATION: 65,
+    BASE_LIGHTNESS: 82,
+    MIN_LIGHTNESS: 38,
     MAX_YIELD_THRESHOLD: 10,
 } as const;
 
-const LOCALE = "en-US";
+const LOCALE = "fr-FR";
 const YEAR_RANGE_LIMIT = 10;
+const DAY_HEADERS = ["L", "M", "M", "J", "V", "S", "D"];
 
 interface DividendSummary {
     ticker: string;
@@ -44,45 +45,33 @@ interface DividendStateProps {
 }
 
 /**
- * Calculates color intensity based on dividend yield
- * Higher yields result in darker, more saturated orange colors
- * @param totalYield - The total dividend yield percentage
- * @returns HSL color string
+ * Calculates gold-tinted color based on dividend yield intensity.
  */
 const getDividendColor = (totalYield: number): string => {
-    if (totalYield === 0) {
-        return COLOR_CONSTANTS.NO_DIVIDEND;
-    }
+    if (totalYield === 0) return COLOR_CONSTANTS.NO_DIVIDEND;
 
     const intensity = Math.min(totalYield / COLOR_CONSTANTS.MAX_YIELD_THRESHOLD, 1);
-
-    const hue = COLOR_CONSTANTS.ORANGE_HUE;
     const saturation = COLOR_CONSTANTS.BASE_SATURATION + intensity * (COLOR_CONSTANTS.MAX_SATURATION - COLOR_CONSTANTS.BASE_SATURATION);
     const lightness = COLOR_CONSTANTS.BASE_LIGHTNESS - intensity * (COLOR_CONSTANTS.BASE_LIGHTNESS - COLOR_CONSTANTS.MIN_LIGHTNESS);
 
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    return `hsl(${COLOR_CONSTANTS.GOLD_HUE}, ${saturation}%, ${lightness}%)`;
 };
 
 /**
- * Generates an array of dates for a calendar month, including padding days
- * Calendar starts on Monday (ISO 8601 standard)
- * @param year - The year
- * @param month - The month (0-11)
- * @returns Array of Date objects representing the calendar grid
+ * Generates an array of dates for a calendar month, including padding days.
+ * Calendar starts on Monday (ISO 8601).
  */
 const getDaysInMonth = (year: number, month: number): Date[] => {
     const days: Date[] = [];
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
-    // Add empty days at the beginning to align the calendar (Monday start)
     const startPadding = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
     for (let i = 0; i < startPadding; i++) {
         days.push(new Date(year, month, -i));
     }
     days.reverse();
 
-    // Add all days of the month
     for (let day = 1; day <= lastDay.getDate(); day++) {
         days.push(new Date(year, month, day));
     }
@@ -96,15 +85,10 @@ interface MonthCalendarProps {
     events: DividendEvent[];
 }
 
-/**
- * MonthCalendar displays a single month with dividend events
- * Days with dividends are colored based on yield intensity
- */
 const MonthCalendar = ({ year, month, events }: MonthCalendarProps) => {
     const days = getDaysInMonth(year, month);
     const monthName = new Date(year, month).toLocaleDateString(LOCALE, { month: "long", year: "numeric" });
 
-    // Group events by day for efficient lookup
     const eventsByDay = events.reduce(
         (acc, event) => {
             const key = event.date.toDateString();
@@ -116,45 +100,77 @@ const MonthCalendar = ({ year, month, events }: MonthCalendarProps) => {
     );
 
     return (
-        <div className="bg-gray-700/50 rounded-lg p-3">
-            <h3 className="text-sm font-semibold mb-3 capitalize text-center">{monthName}</h3>
+        <div
+            style={{
+                backgroundColor: "var(--cream)",
+                borderRadius: "10px",
+                border: "1px solid var(--cream-darker)",
+                padding: "12px",
+            }}
+        >
+            <h3
+                style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    letterSpacing: "0.3px",
+                    textTransform: "capitalize",
+                    textAlign: "center",
+                    color: "var(--ink)",
+                    margin: "0 0 10px",
+                }}
+            >
+                {monthName}
+            </h3>
 
-            <div className="grid grid-cols-7 gap-1 mb-2">
-                {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
-                    <div key={i} className="text-center text-xs text-gray-500 font-medium">
+            <div className="grid grid-cols-7 gap-1 mb-1">
+                {DAY_HEADERS.map((day, i) => (
+                    <div
+                        key={i}
+                        style={{
+                            textAlign: "center",
+                            fontSize: "9px",
+                            color: "var(--muted)",
+                            fontWeight: 500,
+                            letterSpacing: "0.5px",
+                        }}
+                    >
                         {day}
                     </div>
                 ))}
             </div>
+
             <div className="grid grid-cols-7 gap-1">
                 {days.map((day, i) => {
                     const isCurrentMonth = day.getMonth() === month;
                     const dayEvents = eventsByDay[day.toDateString()] || [];
                     const totalYield = dayEvents.reduce((sum, e) => sum + (e.yield || 0), 0);
+                    const hasDividend = isCurrentMonth && dayEvents.length > 0;
+                    const bgColor = hasDividend ? getDividendColor(totalYield) : isCurrentMonth ? "var(--cream-darker)" : "transparent";
+                    const textColor = hasDividend && totalYield >= 5 ? "white" : "var(--ink-soft)";
 
                     return (
                         <div
                             key={i}
-                            className={`
-                aspect-square rounded flex flex-col items-center justify-center text-xs
-                ${isCurrentMonth ? "" : "opacity-30"}
-                ${dayEvents.length > 0 ? "cursor-pointer hover:ring-2 ring-orange-400" : ""}
-              `}
+                            className="aspect-square rounded flex flex-col items-center justify-center"
                             style={{
-                                backgroundColor: isCurrentMonth && dayEvents.length > 0 ? getDividendColor(totalYield) : "#1f2937",
+                                backgroundColor: bgColor,
+                                opacity: isCurrentMonth ? 1 : 0.25,
+                                cursor: hasDividend ? "pointer" : "default",
+                                fontSize: "10px",
+                                color: textColor,
                             }}
                             title={
                                 dayEvents.length > 0
                                     ? dayEvents
-                                          .map((e) => `${e.name}: ${e.yield ? `${e.yield.toFixed(2)}%` : `${e.amount.toFixed(2)}€`}`)
+                                          .map((e) => `${e.name}: ${e.yield ? `${e.yield.toFixed(2)}%` : `${e.amount.toFixed(2)} €`}`)
                                           .join("\n")
                                     : ""
                             }
                         >
-                            <span className={dayEvents.length > 0 ? "font-bold" : ""}>{day.getDate()}</span>
-                            {dayEvents.length > 0 && (
-                                <span className="text-[8px] text-orange-200 mt-0.5">
-                                    {totalYield > 0 ? `${totalYield.toFixed(1)}%` : "-"}
+                            <span style={{ fontWeight: hasDividend ? 600 : 400 }}>{day.getDate()}</span>
+                            {hasDividend && (
+                                <span style={{ fontSize: "7px", opacity: 0.9, lineHeight: 1 }}>
+                                    {totalYield > 0 ? `${totalYield.toFixed(1)}%` : "·"}
                                 </span>
                             )}
                         </div>
@@ -170,172 +186,237 @@ interface DividendCalendarProps {
     dividendState: DividendStateProps;
 }
 
-/**
- * DividendCalendar is the main component that displays dividend information
- * Shows a 12-month calendar view with dividend payments colored by yield intensity
- * Includes summary statistics and detailed breakdown by ticker
- */
 const DividendCalendar = ({ positions, dividendState }: DividendCalendarProps) => {
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
     const { dividendData, loading, error, totalAmount, totalPayments, lastPaymentDate, getEventsByYear, getYearTotal } = dividendState;
 
+    const headerContent = (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+            <Calendar size={16} style={{ color: "var(--gold)", flexShrink: 0 }} />
+            <h2 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--ink)" }}>
+                Calendrier des Dividendes
+            </h2>
+        </div>
+    );
+
     if (positions.length === 0) {
         return (
-            <div className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Dividend Calendar</h2>
-                </div>
-                <p className="text-gray-500 text-center py-8">No positions available</p>
+            <div className="pea-card" style={{ padding: "24px" }}>
+                {headerContent}
+                <p style={{ color: "var(--muted)", textAlign: "center", padding: "32px 0", fontSize: "13px", margin: 0 }}>
+                    Aucune position dans votre portefeuille.
+                </p>
             </div>
         );
     }
 
-    if (loading) {
-        return <SkeletonDividendCalendar />;
-    }
+    if (loading) return <SkeletonDividendCalendar />;
 
     if (error) {
         return (
-            <div className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Dividend Calendar</h2>
-                </div>
-                <p className="text-red-400 text-center py-8">{error}</p>
+            <div className="pea-card" style={{ padding: "24px" }}>
+                {headerContent}
+                <p style={{ color: "var(--red)", textAlign: "center", padding: "32px 0", fontSize: "13px", margin: 0 }}>
+                    {error}
+                </p>
             </div>
         );
     }
 
     const yearEvents = getEventsByYear(currentYear);
     const totalAnnual = getYearTotal(currentYear);
+    const navBtnStyle: React.CSSProperties = {
+        padding: "4px 6px",
+        backgroundColor: "transparent",
+        border: "1px solid var(--cream-darker)",
+        borderRadius: "6px",
+        cursor: "pointer",
+        color: "var(--muted)",
+        display: "flex",
+        alignItems: "center",
+    };
 
     return (
-        <div className="bg-gray-800 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Dividend Calendar</h2>
+        <div className="pea-card" style={{ padding: "24px" }}>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Calendar size={16} style={{ color: "var(--gold)", flexShrink: 0 }} />
+                    <h2 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--ink)" }}>
+                        Calendrier des Dividendes
+                    </h2>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="text-sm bg-gray-700 px-3 py-1 rounded">
-                        <span className="text-gray-400">Total {currentYear}: </span>
-                        <span className="text-orange-400 font-bold">{totalAnnual.toFixed(2)}€</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div
+                        style={{
+                            fontSize: "12px",
+                            backgroundColor: "var(--cream)",
+                            border: "1px solid var(--cream-darker)",
+                            borderRadius: "8px",
+                            padding: "4px 12px",
+                        }}
+                    >
+                        <span style={{ color: "var(--muted)" }}>Total {currentYear} : </span>
+                        <span style={{ color: "var(--gold)", fontWeight: 600 }}>
+                            {totalAnnual.toFixed(2)} €
+                        </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                         <button
                             onClick={() => setCurrentYear(currentYear - 1)}
-                            className="p-1 hover:bg-gray-700 rounded"
                             disabled={currentYear <= new Date().getFullYear() - YEAR_RANGE_LIMIT}
-                            aria-label="Previous year"
+                            aria-label="Année précédente"
+                            style={navBtnStyle}
                         >
-                            <ChevronLeft className="w-4 h-4" />
+                            <ChevronLeft size={14} />
                         </button>
-                        <span className="text-sm font-semibold min-w-15 text-center">{currentYear}</span>
+                        <span
+                            style={{
+                                fontSize: "13px",
+                                fontWeight: 600,
+                                minWidth: "48px",
+                                textAlign: "center",
+                                color: "var(--ink)",
+                            }}
+                        >
+                            {currentYear}
+                        </span>
                         <button
                             onClick={() => setCurrentYear(currentYear + 1)}
-                            className="p-1 hover:bg-gray-700 rounded"
                             disabled={currentYear >= new Date().getFullYear()}
-                            aria-label="Next year"
+                            aria-label="Année suivante"
+                            style={navBtnStyle}
                         >
-                            <ChevronRight className="w-4 h-4" />
+                            <ChevronRight size={14} />
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-gray-700/50 rounded p-3">
-                    <p className="text-xs text-gray-400">Total Received (10 Years)</p>
-                    <p className="text-lg font-bold text-orange-400">{totalAmount.toFixed(2)}€</p>
-                </div>
-                <div className="bg-gray-700/50 rounded p-3">
-                    <p className="text-xs text-gray-400">Number of Payments</p>
-                    <p className="text-lg font-bold text-blue-400">{totalPayments}</p>
-                </div>
-                <div className="bg-gray-700/50 rounded p-3">
-                    <p className="text-xs text-gray-400">Last Payment</p>
-                    <p className="text-lg font-bold text-green-400">{lastPaymentDate ? formatDate(lastPaymentDate) : "-"}</p>
-                </div>
+            {/* Summary KPI cards */}
+            <div className="grid grid-cols-3 gap-4" style={{ marginBottom: "24px" }}>
+                {[
+                    { label: "Total reçu (10 ans)", value: `${totalAmount.toFixed(2)} €`, color: "var(--gold)" },
+                    { label: "Nombre de versements", value: String(totalPayments), color: "var(--ink)" },
+                    { label: "Dernier versement", value: lastPaymentDate ? formatDate(lastPaymentDate) : "—", color: "var(--green)" },
+                ].map(({ label, value, color }) => (
+                    <div
+                        key={label}
+                        style={{
+                            backgroundColor: "var(--cream)",
+                            borderRadius: "10px",
+                            padding: "14px 16px",
+                            border: "1px solid var(--cream-darker)",
+                        }}
+                    >
+                        <p className="pea-label" style={{ marginBottom: "8px" }}>{label}</p>
+                        <p style={{ margin: 0, fontSize: "18px", fontWeight: 500, color }}>
+                            {value}
+                        </p>
+                    </div>
+                ))}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+            {/* 12-month calendar grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Array.from({ length: 12 }, (_, i) => (
                     <MonthCalendar key={i} year={currentYear} month={i} events={yearEvents} />
                 ))}
             </div>
 
-            <div className="mt-6">
-                <DividendMonthlyBarChart events={yearEvents} year={currentYear} />
+            {/* Legend */}
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px", marginTop: "16px" }}>
+                <span className="pea-label">Intensité du rendement :</span>
+                {[0, 2, 4, 6, 8, 10].map((yld) => (
+                    <div key={yld} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <div
+                            style={{
+                                width: "14px",
+                                height: "14px",
+                                borderRadius: "4px",
+                                backgroundColor: yld === 0 ? "var(--cream-darker)" : getDividendColor(yld),
+                            }}
+                        />
+                        <span style={{ fontSize: "11px", color: "var(--muted)" }}>
+                            {yld === 0 ? "Aucun" : `~${yld}%`}
+                        </span>
+                    </div>
+                ))}
             </div>
 
-            <div className="mt-4 border-t border-gray-700 pt-4">
-                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400 mb-4">
-                    <span>Yield Intensity:</span>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded border border-gray-400" style={{ backgroundColor: getDividendColor(0) }} />
-                        <span>No payment</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: getDividendColor(2) }} />
-                        <span>~2%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: getDividendColor(4) }} />
-                        <span>~4%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: getDividendColor(6) }} />
-                        <span>~6%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: getDividendColor(8) }} />
-                        <span>~8%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded" style={{ backgroundColor: getDividendColor(10) }} />
-                        <span>10%+</span>
-                    </div>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-xs">
+            {/* Bar chart */}
+            <div style={{ marginTop: "24px" }}>
+                <DividendMonthlyBarChart
+                    events={yearEvents}
+                    year={currentYear}
+                    tickerColors={Object.fromEntries(positions.map((p) => [p.ticker, p.color || "var(--gold)"]))}
+                />
+            </div>
+
+            {/* Breakdown table */}
+            <div style={{ marginTop: "20px", borderTop: "1px solid var(--cream-darker)", paddingTop: "20px" }}>
+                {/* Breakdown table */}
+                <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse" }}>
                         <thead>
-                            <tr className="text-gray-400 text-left border-b border-gray-700">
-                                <th className="pb-2 pr-4">Name</th>
-                                <th className="pb-2 pr-4 text-right">Payments</th>
-                                <th className="pb-2 pr-4 text-right">First Payment</th>
-                                <th className="pb-2 pr-4 text-right">Last Payment</th>
-                                <th className="pb-2 text-right">Average Yield</th>
+                            <tr>
+                                {["Valeur", "Versements", "Premier versement", "Dernier versement", "Rendement moyen"].map((h, i) => (
+                                    <th
+                                        key={h}
+                                        style={{
+                                            fontSize: "10px",
+                                            fontWeight: 500,
+                                            letterSpacing: "1px",
+                                            textTransform: "uppercase",
+                                            color: "var(--muted)",
+                                            textAlign: i === 0 ? "left" : "right",
+                                            paddingBottom: "10px",
+                                            paddingRight: i < 4 ? "12px" : "0",
+                                            borderBottom: "1px solid var(--cream-darker)",
+                                        }}
+                                    >
+                                        {h}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
                             {dividendData.map((div) => {
                                 const firstPayment = div.dividends.length > 0 ? new Date(div.dividends[0].date) : null;
-                                const lastPayment =
-                                    div.dividends.length > 0 ? new Date(div.dividends[div.dividends.length - 1].date) : null;
-
+                                const lastPayment = div.dividends.length > 0 ? new Date(div.dividends[div.dividends.length - 1].date) : null;
                                 const yieldsWithData = div.dividends.filter((d) => d.yield !== null && d.yield !== undefined);
                                 const avgYield =
                                     yieldsWithData.length > 0
                                         ? yieldsWithData.reduce((sum, d) => sum + (d.yield || 0), 0) / yieldsWithData.length
                                         : null;
-
                                 const position = positions.find((p) => p.ticker === div.ticker);
+                                const tdStyle: React.CSSProperties = {
+                                    padding: "10px 12px 10px 0",
+                                    borderBottom: "1px solid var(--cream-dark)",
+                                    color: "var(--ink-soft)",
+                                    verticalAlign: "middle",
+                                };
+
                                 return (
-                                    <tr key={div.ticker} className="border-b border-gray-700/50">
-                                        <td className="py-1 pr-4">
-                                            <div className="flex flex-col">
-                                                <span className="font-medium">{position?.name || div.ticker}</span>
-                                                <span className="text-[10px] text-gray-400">{div.ticker}</span>
-                                            </div>
+                                    <tr key={div.ticker}>
+                                        <td style={tdStyle}>
+                                            <span style={{ fontWeight: 500, color: "var(--ink)", display: "block" }}>
+                                                {position?.name || div.ticker}
+                                            </span>
+                                            <span style={{ fontSize: "10px", color: "var(--muted)" }}>{div.ticker}</span>
                                         </td>
-                                        <td className="py-1 pr-4 text-right">{div.dividends.length}</td>
-                                        <td className="py-1 pr-4 text-right">{firstPayment ? formatDate(firstPayment) : "-"}</td>
-                                        <td className="py-1 pr-4 text-right">{lastPayment ? formatDate(lastPayment) : "-"}</td>
-                                        <td className="py-1 text-right text-blue-400 font-semibold">
-                                            {avgYield !== null ? `${avgYield.toFixed(2)}%` : "-"}
+                                        <td style={{ ...tdStyle, textAlign: "right" }}>{div.dividends.length}</td>
+                                        <td style={{ ...tdStyle, textAlign: "right" }}>{firstPayment ? formatDate(firstPayment) : "—"}</td>
+                                        <td style={{ ...tdStyle, textAlign: "right" }}>{lastPayment ? formatDate(lastPayment) : "—"}</td>
+                                        <td style={{ ...tdStyle, textAlign: "right", paddingRight: 0 }}>
+                                            {avgYield !== null ? (
+                                                <span className="pea-badge pea-badge-green">{avgYield.toFixed(2)}%</span>
+                                            ) : (
+                                                <span style={{ color: "var(--muted)" }}>—</span>
+                                            )}
                                         </td>
                                     </tr>
                                 );

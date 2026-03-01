@@ -29,52 +29,99 @@ export const LoginForm = () => {
         }
     };
 
+    const inputStyle: React.CSSProperties = {
+        width: "100%",
+        padding: "10px 12px",
+        backgroundColor: "var(--cream-dark)",
+        border: "1px solid var(--cream-darker)",
+        borderRadius: "8px",
+        fontSize: "13px",
+        fontFamily: "'Inter', sans-serif",
+        color: "var(--ink-soft)",
+        outline: "none",
+        boxSizing: "border-box",
+    };
+
+    const labelStyle: React.CSSProperties = {
+        display: "block",
+        fontSize: "11px",
+        fontWeight: 500,
+        letterSpacing: "1px",
+        textTransform: "uppercase",
+        color: "var(--muted)",
+        marginBottom: "6px",
+    };
+
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded">{error}</div>}
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {error && (
+                <div
+                    style={{
+                        backgroundColor: "rgba(139,58,58,0.08)",
+                        border: "1px solid rgba(139,58,58,0.3)",
+                        color: "var(--red)",
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                    }}
+                >
+                    {error}
+                </div>
+            )}
 
             <div>
-                <label htmlFor="username" className="block text-sm font-medium mb-1">
-                    Email or Username
-                </label>
+                <label htmlFor="username" style={labelStyle}>Email ou nom d'utilisateur</label>
                 <input
                     id="username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your email or username"
+                    style={inputStyle}
+                    placeholder="Votre email ou nom d'utilisateur"
                 />
             </div>
 
             <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-1">
-                    Password
-                </label>
+                <label htmlFor="password" style={labelStyle}>Mot de passe</label>
                 <input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your password"
+                    style={inputStyle}
+                    placeholder="Votre mot de passe"
                 />
             </div>
 
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed py-2 rounded font-medium cursor-pointer"
+                style={{
+                    width: "100%",
+                    padding: "12px",
+                    backgroundColor: loading ? "var(--cream-darker)" : "var(--ink)",
+                    color: loading ? "var(--muted)" : "var(--gold)",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    fontFamily: "'Inter', sans-serif",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    marginTop: "4px",
+                }}
             >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? "Connexion..." : "Se connecter"}
             </button>
 
-            <p className="text-center text-sm text-gray-400">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-blue-500 hover:text-blue-400">
-                    Register here
+            <p style={{ textAlign: "center", fontSize: "12px", color: "var(--muted)", margin: 0 }}>
+                Pas encore de compte ?{" "}
+                <Link
+                    to="/register"
+                    style={{ color: "var(--gold)", textDecoration: "none", fontWeight: 500 }}
+                >
+                    S'inscrire
                 </Link>
             </p>
         </form>

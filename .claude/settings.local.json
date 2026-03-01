@@ -5,7 +5,8 @@
       "Bash(.venvScriptspip.exe install -r backendrequirements.txt)",
       "Bash(\".venv/Scripts/pip.exe\" install -r backend/requirements.txt)",
       "Bash(npm run type-check:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebFetch(domain:ranaroussi.github.io)"
     ]
   }
 }

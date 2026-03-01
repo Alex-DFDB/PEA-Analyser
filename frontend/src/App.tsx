@@ -17,22 +17,20 @@ import { usePriceUpdate } from "./hooks/usePriceUpdate";
 import { useDividends } from "./hooks/useDividends";
 
 /**
- * Main application component with authentication support.
- * Manages global state for portfolio positions, historical data, and dividends.
- * Provides routing between public and protected pages.
+ * Ne monte QUE lorsque ProtectedRoute a validé l'auth.
+ * Les hooks API ne s'exécutent donc jamais sur les pages publiques,
+ * ce qui évite la boucle 401 → refresh → 401.
  */
-function AppContent() {
+function AuthenticatedApp() {
     const { positions, addPosition, deletePosition, setPositions, loading: positionsLoading } = usePositions();
     const { historicalReturns, historicalData, fetchHistoricalData, loading: historicalLoading } = useHistoricalData();
     const { updatePrices, loading: pricesLoading } = usePriceUpdate(positions, setPositions);
-    const dividendState = useDividends(positions, false); // Disable auto-fetch, we'll manage it manually
+    const dividendState = useDividends(positions, false);
     const isRefreshingRef = useRef(false);
 
-    // Fetch historical and dividends in parallel when positions change
     useEffect(() => {
         if (positions.length > 0 && !isRefreshingRef.current) {
             const tickers = positions.map((p) => p.ticker);
-            // Launch both fetches in parallel
             Promise.all([
                 fetchHistoricalData(tickers),
                 dividendState.fetchDividends(positions),
@@ -41,19 +39,11 @@ function AppContent() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [positions.map(p => p.ticker).sort().join(','), dividendState.fetchDividends]);
 
-    /**
-     * Refresh all data in parallel (quotes, historical, dividends)
-     */
     const refreshAll = async () => {
         if (positions.length === 0) return;
-
         const tickers = positions.map((p) => p.ticker);
-
-        // Prevent the useEffect from triggering during manual refresh
         isRefreshingRef.current = true;
-
         try {
-            // Launch all fetches in parallel
             await Promise.all([
                 updatePrices(),
                 fetchHistoricalData(tickers),
@@ -64,84 +54,71 @@ function AppContent() {
         }
     };
 
-    return (
-        <Router>
-            <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+    const layout = (content: React.ReactNode) => (
+        <div style={{ minHeight: "100vh" }}>
+            <Navbar />
+            <main style={{ marginLeft: "220px", padding: "36px 40px" }}>
+                <Header />
+                {content}
+            </main>
+        </div>
+    );
 
-                {/* Protected routes */}
-                <Route element={<ProtectedRoute />}>
-                    <Route
-                        path="/portfolio"
-                        element={
-                            <div className="min-h-screen bg-gray-900 text-white p-6">
-                                <Navbar />
-                                <main className="ml-[280px]">
-                                    <Header />
-                                    <div className="w-full">
-                                        <PortfolioPage
-                                            positions={positions}
-                                            addPosition={addPosition}
-                                            deletePosition={deletePosition}
-                                            setPositions={setPositions}
-                                            updatePrices={refreshAll}
-                                            positionsLoading={positionsLoading}
-                                            pricesLoading={pricesLoading || historicalLoading || dividendState.loading}
-                                            historicalLoading={historicalLoading}
-                                            historicalData={historicalData}
-                                            historicalReturns={historicalReturns}
-                                        />
-                                    </div>
-                                </main>
-                            </div>
-                        }
+    return (
+        <Routes>
+            <Route
+                path="/portfolio"
+                element={layout(
+                    <PortfolioPage
+                        positions={positions}
+                        addPosition={addPosition}
+                        deletePosition={deletePosition}
+                        setPositions={setPositions}
+                        updatePrices={refreshAll}
+                        positionsLoading={positionsLoading}
+                        pricesLoading={pricesLoading || historicalLoading || dividendState.loading}
+                        historicalLoading={historicalLoading}
+                        historicalReturns={historicalReturns}
                     />
-                    <Route
-                        path="/dividends"
-                        element={
-                            <div className="min-h-screen bg-gray-900 text-white p-6">
-                                <Navbar />
-                                <main className="ml-[280px]">
-                                    <Header />
-                                    <div className="w-full">
-                                        <DividendsPage positions={positions} dividendState={dividendState} />
-                                    </div>
-                                </main>
-                            </div>
-                        }
+                )}
+            />
+            <Route
+                path="/dividends"
+                element={layout(
+                    <DividendsPage positions={positions} dividendState={dividendState} />
+                )}
+            />
+            <Route
+                path="/analysis"
+                element={layout(
+                    <StockAnalysisPage
+                        positions={positions}
+                        historicalData={historicalData}
+                        historicalLoading={historicalLoading}
+                        dividendState={dividendState}
                     />
-                    <Route
-                        path="/analysis"
-                        element={
-                            <div className="min-h-screen bg-gray-900 text-white p-6">
-                                <Navbar />
-                                <main className="ml-[280px]">
-                                    <Header />
-                                    <div className="w-full">
-                                        <StockAnalysisPage
-                                            positions={positions}
-                                            historicalData={historicalData}
-                                            historicalLoading={historicalLoading}
-                                            dividendState={dividendState}
-                                        />
-                                    </div>
-                                </main>
-                            </div>
-                        }
-                    />
-                </Route>
-            </Routes>
-        </Router>
+                )}
+            />
+        </Routes>
     );
 }
 
 export default function App() {
     return (
         <AuthProvider>
-            <AppContent />
+            <Router>
+                <Routes>
+                    {/* Routes publiques — aucun hook API */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+
+                    {/* Routes protégées — AuthenticatedApp (et ses hooks) ne monte que si auth valide */}
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="/*" element={<AuthenticatedApp />} />
+                    </Route>
+                </Routes>
+            </Router>
         </AuthProvider>
     );
 }

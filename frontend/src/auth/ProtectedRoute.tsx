@@ -7,11 +7,10 @@ import { useAuth } from './AuthContext';
 export const ProtectedRoute = () => {
     const { isAuthenticated, loading } = useAuth();
 
-    // Show loading state while checking authentication
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900">
-                <div className="text-white">Loading...</div>
+            <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: "24px", color: "var(--gold)", opacity: 0.6 }}>⊙</span>
             </div>
         );
     }

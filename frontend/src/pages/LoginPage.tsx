@@ -3,14 +3,36 @@ import { LoginForm } from "../components/Auth/LoginForm";
 
 const LoginPage = () => {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white px-4">
-            <div className="max-w-md w-full">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold mb-2">PEA Portfolio Tracker</h1>
-                    <p className="text-gray-400">Login to your account</p>
+        <div
+            style={{
+                minHeight: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "24px",
+            }}
+        >
+            <div style={{ width: "100%", maxWidth: "420px" }}>
+                {/* Logo */}
+                <div style={{ textAlign: "center", marginBottom: "36px" }}>
+                    <span style={{ fontSize: "24px", color: "var(--gold)" }}>⊙</span>
+                    <h1
+                        style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: "22px",
+                            fontWeight: 500,
+                            color: "var(--ink)",
+                            margin: "8px 0 4px",
+                        }}
+                    >
+                        PEA·ANALYSER
+                    </h1>
+                    <p style={{ fontSize: "13px", color: "var(--muted)", margin: 0 }}>
+                        Connectez-vous à votre compte
+                    </p>
                 </div>
 
-                <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
+                <div className="pea-card" style={{ padding: "32px" }}>
                     <LoginForm />
                 </div>
             </div>

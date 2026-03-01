@@ -1,27 +1,29 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
-import { TrendingUp } from "lucide-react";
 import { formatDate } from "../../utils/date";
 import { SkeletonChart } from "../common/Skeleton";
 
-/**
- * Custom tooltip component for displaying price data
- */
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 shadow-lg">
-                <p className="text-sm font-semibold text-white mb-2">
+            <div style={{
+                background: "white",
+                border: "1px solid var(--cream-darker)",
+                borderRadius: "10px",
+                padding: "10px 14px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}>
+                <p style={{ fontSize: "11px", fontWeight: 600, color: "var(--muted)", letterSpacing: "0.5px", marginBottom: "6px" }}>
                     {formatDate(new Date(label))}
                 </p>
-                <div className="text-xs flex justify-between gap-3">
-                    <span className="text-gray-300">Prix:</span>
-                    <span className="font-semibold text-white">{payload[0].value.toFixed(2)} €</span>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", fontSize: "12px" }}>
+                    <span style={{ color: "var(--muted)" }}>Prix</span>
+                    <span style={{ fontWeight: 600, color: "var(--ink)" }}>{payload[0].value.toFixed(2)} €</span>
                 </div>
                 {payload[0].payload.volume && (
-                    <div className="text-xs flex justify-between gap-3">
-                        <span className="text-gray-300">Volume:</span>
-                        <span className="font-semibold text-white">
-                            {payload[0].payload.volume.toLocaleString()}
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", fontSize: "12px", marginTop: "2px" }}>
+                        <span style={{ color: "var(--muted)" }}>Volume</span>
+                        <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>
+                            {payload[0].payload.volume.toLocaleString("fr-FR")}
                         </span>
                     </div>
                 )}
@@ -31,13 +33,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-/**
- * StockAreaChart displays the historical price data for a single stock as an area chart
- * @param ticker - Stock ticker symbol
- * @param name - Stock name
- * @param historicalData - Historical price data array
- * @param loading - Loading state
- */
 const StockAreaChart = ({
     ticker,
     name,
@@ -55,24 +50,23 @@ const StockAreaChart = ({
 
     if (!historicalData || historicalData.length === 0) {
         return (
-            <div className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-blue-400" />
-                    <h2 className="font-semibold">Prix Historique</h2>
-                </div>
-                <p className="text-gray-500 text-center py-8">Aucune donnée disponible</p>
+            <div className="pea-card" style={{ padding: "24px" }}>
+                <h2 style={{ margin: "0 0 20px", fontSize: "14px", fontWeight: 600, color: "var(--ink)" }}>
+                    Prix Historique
+                </h2>
+                <p style={{ color: "var(--muted)", textAlign: "center", padding: "32px 0", fontSize: "13px", margin: 0 }}>
+                    Cliquez sur « Actualiser » pour charger les données
+                </p>
             </div>
         );
     }
 
-    // Prepare chart data
     const chartData = historicalData.map((point) => ({
         date: point.Date,
         price: point.Close,
         volume: point.Volume,
     }));
 
-    // Calculate min and max for better scaling
     const prices = chartData.map((d) => d.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
@@ -81,20 +75,19 @@ const StockAreaChart = ({
     const yAxisMax = Math.ceil(maxPrice + priceRange * 0.1);
 
     return (
-        <div className="bg-gray-800 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
-                <h2 className="font-semibold">Prix Historique - {name} ({ticker})</h2>
-            </div>
-            <ResponsiveContainer width="100%" height={400}>
+        <div className="pea-card" style={{ padding: "24px" }}>
+            <h2 style={{ margin: "0 0 20px", fontSize: "14px", fontWeight: 600, color: "var(--ink)" }}>
+                Prix Historique — {name} ({ticker})
+            </h2>
+            <ResponsiveContainer width="100%" height={360}>
                 <AreaChart data={chartData}>
                     <defs>
                         <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+                            <stop offset="5%" stopColor="#C4A86A" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="#C4A86A" stopOpacity={0.02} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <CartesianGrid strokeDasharray="2,8" stroke="rgba(196,168,106,0.3)" />
                     <XAxis
                         dataKey="date"
                         tickFormatter={(date) => {
@@ -103,23 +96,27 @@ const StockAreaChart = ({
                                 ? d.getFullYear().toString()
                                 : d.toLocaleDateString("fr-FR", { month: "short" });
                         }}
-                        stroke="#9ca3af"
-                        fontSize={12}
+                        tick={{ fill: "var(--muted)", fontSize: 11, fontFamily: "'Inter', sans-serif" }}
+                        axisLine={false}
+                        tickLine={false}
                     />
                     <YAxis
                         domain={[yAxisMin, yAxisMax]}
-                        tickFormatter={(v) => `${v.toFixed(0)}€`}
-                        stroke="#9ca3af"
-                        fontSize={12}
+                        tickFormatter={(v) => `${v.toFixed(0)} €`}
+                        tick={{ fill: "var(--muted)", fontSize: 11, fontFamily: "'Inter', sans-serif" }}
+                        axisLine={false}
+                        tickLine={false}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Area
                         type="monotone"
                         dataKey="price"
-                        stroke="#3b82f6"
-                        strokeWidth={2}
+                        stroke="#C4A86A"
+                        strokeWidth={2.5}
+                        strokeLinecap="round"
                         fillOpacity={1}
                         fill="url(#colorPrice)"
+                        dot={false}
                     />
                 </AreaChart>
             </ResponsiveContainer>

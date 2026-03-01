@@ -7,76 +7,133 @@ interface MonthlyData {
     month: string;
     monthIndex: number;
     total: number;
-    [ticker: string]: number | string; // Allow dynamic ticker properties
+    [ticker: string]: number | string;
 }
 
 interface DividendMonthlyBarChartProps {
-    /** Array of dividend events */
     events: DividendEvent[];
-    /** Current year to display */
     year: number;
+    tickerColors?: Record<string, string>;
 }
 
-/**
- * DividendMonthlyBarChart displays a bar chart summarizing dividend payments by month
- * Shows the total amount received for each month of the selected year
- * Can toggle between total view and per-ticker breakdown view
- */
-const DividendMonthlyBarChart = ({ events, year }: DividendMonthlyBarChartProps) => {
+const MONTH_NAMES = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+
+const GOLD_HUE = 38;
+
+const getBarColor = (value: number, maxValue: number): string => {
+    if (value === 0) return "var(--cream-darker)";
+    const intensity = maxValue > 0 ? value / maxValue : 0;
+    const saturation = 45 + intensity * 20;
+    const lightness = 80 - intensity * 42;
+    return `hsl(${GOLD_HUE}, ${saturation}%, ${lightness}%)`;
+};
+
+const CustomTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    const monthData = payload[0].payload;
+    return (
+        <div
+            style={{
+                backgroundColor: "white",
+                border: "1px solid var(--cream-darker)",
+                borderRadius: "10px",
+                padding: "10px 14px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                maxWidth: "200px",
+            }}
+        >
+            <p
+                style={{
+                    margin: "0 0 8px",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: "var(--ink)",
+                }}
+            >
+                {monthData.month}
+            </p>
+            {payload
+                .filter((entry: any) => entry.value > 0)
+                .reverse()
+                .map((entry: any, index: number) => (
+                    <div
+                        key={index}
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "12px",
+                            fontSize: "12px",
+                            padding: "2px 0",
+                        }}
+                    >
+                        <span style={{ color: entry.color }}>{entry.name}</span>
+                        <span style={{ fontWeight: 600, color: "var(--ink-soft)" }}>{entry.value.toFixed(2)} €</span>
+                    </div>
+                ))}
+            {payload.length > 1 && (
+                <div
+                    style={{
+                        borderTop: "1px solid var(--cream-darker)",
+                        marginTop: "6px",
+                        paddingTop: "6px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "12px",
+                        fontSize: "12px",
+                    }}
+                >
+                    <span style={{ color: "var(--gold)", fontWeight: 600 }}>Total</span>
+                    <span style={{ color: "var(--gold)", fontWeight: 600 }}>{monthData.total.toFixed(2)} €</span>
+                </div>
+            )}
+            {payload.length === 1 && (
+                <p style={{ margin: 0, fontSize: "12px", color: "var(--gold)" }}>
+                    Total : {payload[0].value.toFixed(2)} €
+                </p>
+            )}
+        </div>
+    );
+};
+
+const CustomLegend = ({ payload }: any) => (
+    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "12px", marginTop: "12px" }}>
+        {payload.map((entry: any, index: number) => (
+            <div key={`legend-${index}`} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ width: "10px", height: "10px", borderRadius: "3px", backgroundColor: entry.color }} />
+                <span style={{ fontSize: "11px", color: "var(--muted)" }}>{entry.value}</span>
+            </div>
+        ))}
+    </div>
+);
+
+const DividendMonthlyBarChart = ({ events, year, tickerColors = {} }: DividendMonthlyBarChartProps) => {
     const [showByTicker, setShowByTicker] = useState(false);
 
-    // Month names for display
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-    /**
-     * Gets all unique tickers from the events
-     * @returns Array of ticker symbols
-     */
     const getUniqueTickers = (): string[] => {
         const tickers = new Set<string>();
-        events
-            .filter((e) => e.date.getFullYear() === year)
-            .forEach((event) => {
-                tickers.add(event.ticker);
-            });
+        events.filter((e) => e.date.getFullYear() === year).forEach((e) => tickers.add(e.ticker));
         return Array.from(tickers).sort();
     };
 
-    /**
-     * Prepares monthly data by aggregating dividend amounts per month
-     * @returns Array of monthly totals with month name and amount
-     */
     const prepareMonthlyData = (): MonthlyData[] => {
-        // Filter events for the selected year
         const yearEvents = events.filter((e) => e.date.getFullYear() === year);
-
-        // Initialize all months with 0
         const monthlyTotals: MonthlyData[] = Array.from({ length: 12 }, (_, i) => ({
-            month: monthNames[i],
+            month: MONTH_NAMES[i],
             monthIndex: i,
             total: 0,
         }));
 
         if (showByTicker) {
-            // Initialize ticker amounts for each month
             const tickers = getUniqueTickers();
-            monthlyTotals.forEach((month) => {
-                tickers.forEach((ticker) => {
-                    month[ticker] = 0;
-                });
-            });
-
-            // Aggregate dividends by month and ticker
-            yearEvents.forEach((event) => {
-                const monthIndex = event.date.getMonth();
-                monthlyTotals[monthIndex][event.ticker] = (monthlyTotals[monthIndex][event.ticker] as number) + event.amount;
-                monthlyTotals[monthIndex].total += event.amount;
+            monthlyTotals.forEach((m) => tickers.forEach((t) => (m[t] = 0)));
+            yearEvents.forEach((e) => {
+                const mi = e.date.getMonth();
+                monthlyTotals[mi][e.ticker] = (monthlyTotals[mi][e.ticker] as number) + e.amount;
+                monthlyTotals[mi].total += e.amount;
             });
         } else {
-            // Aggregate dividends by month only
-            yearEvents.forEach((event) => {
-                const monthIndex = event.date.getMonth();
-                monthlyTotals[monthIndex].total += event.amount;
+            yearEvents.forEach((e) => {
+                monthlyTotals[e.date.getMonth()].total += e.amount;
             });
         }
 
@@ -86,143 +143,106 @@ const DividendMonthlyBarChart = ({ events, year }: DividendMonthlyBarChartProps)
     const monthlyData = prepareMonthlyData();
     const maxValue = Math.max(...monthlyData.map((d) => d.total));
     const tickers = getUniqueTickers();
-
-    /**
-     * Custom tooltip component for displaying monthly dividend information
-     */
-    const CustomTooltip = ({ active, payload }: any) => {
-        if (active && payload && payload.length) {
-            const monthData = payload[0].payload;
-            return (
-                <div className="bg-gray-700 border border-gray-600 rounded-lg p-3 shadow-lg max-w-xs">
-                    <p className="text-sm font-semibold text-white mb-2">
-                        {monthData.month} {year}
-                    </p>
-                    {showByTicker ? (
-                        <>
-                            {payload
-                                .filter((entry: any) => entry.value > 0)
-                                .reverse()
-                                .map((entry: any, index: number) => (
-                                    <div key={index} className="text-xs flex justify-between gap-3 py-0.5">
-                                        <span style={{ color: entry.color }}>{entry.name}:</span>
-                                        <span className="font-semibold text-white">{entry.value.toFixed(2)}€</span>
-                                    </div>
-                                ))}
-                            <div className="border-t border-gray-600 mt-2 pt-2">
-                                <div className="text-sm flex justify-between gap-3">
-                                    <span className="text-orange-400 font-semibold">Total:</span>
-                                    <span className="text-orange-400 font-semibold">{monthData.total.toFixed(2)}€</span>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <p className="text-sm text-orange-400">Total: {payload[0].value.toFixed(2)}€</p>
-                    )}
-                </div>
-            );
-        }
-        return null;
-    };
-
-    /**
-     * Custom legend component with square rounded icons
-     */
-    const CustomLegend = ({ payload }: any) => {
-        return (
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
-                {payload.map((entry: any, index: number) => (
-                    <div key={`legend-${index}`} className="flex items-center gap-2">
-                        <div
-                            className="w-4 h-4 rounded"
-                            style={{ backgroundColor: entry.color }}
-                        />
-                        <span className="text-xs text-gray-400">{entry.value}</span>
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
-    /**
-     * Gets bar color based on the value intensity
-     * Higher values get darker/more saturated orange colors
-     */
-    const getBarColor = (value: number) => {
-        if (value === 0) return "#374151"; // gray-700
-        const intensity = maxValue > 0 ? value / maxValue : 0;
-        const hue = 25; // orange hue
-        const saturation = 70 + intensity * 30; // 70-100%
-        const lightness = 65 - intensity * 35; // 65-30%
-        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    };
-
-    /**
-     * Generates a unique color for each ticker
-     * Uses HSL color space with varying hues
-     */
-    const getTickerColor = (index: number, total: number) => {
-        const hue = (index * 360) / total;
-        const saturation = 65 + (index % 3) * 10; // 65-85%
-        const lightness = 50 + (index % 2) * 10; // 50-60%
-        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    };
+    const hasData = monthlyData.some((d) => d.total > 0);
 
     return (
-        <div className="bg-gray-800 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-orange-400" />
-                    <h2 className="font-semibold">Monthly Dividend Summary</h2>
+        <div className="pea-card" style={{ padding: "20px 24px" }}>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <BarChart3 size={16} style={{ color: "var(--gold)" }} />
+                    <h2 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--ink)" }}>
+                        Résumé mensuel des dividendes
+                    </h2>
                 </div>
 
-                {/* Toggle switch for view mode */}
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400">Total</span>
+                {/* Toggle */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>Total</span>
                     <button
                         onClick={() => setShowByTicker(!showByTicker)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                            showByTicker ? "bg-orange-500" : "bg-gray-600"
-                        }`}
                         role="switch"
                         aria-checked={showByTicker}
-                        aria-label="Toggle breakdown by ticker"
+                        aria-label="Afficher par ticker"
+                        style={{
+                            position: "relative",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            width: "40px",
+                            height: "22px",
+                            borderRadius: "11px",
+                            backgroundColor: showByTicker ? "var(--ink)" : "var(--cream-darker)",
+                            border: "none",
+                            cursor: "pointer",
+                            transition: "background-color 0.2s ease",
+                            padding: 0,
+                        }}
                     >
                         <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                showByTicker ? "translate-x-6" : "translate-x-1"
-                            }`}
+                            style={{
+                                display: "inline-block",
+                                width: "16px",
+                                height: "16px",
+                                borderRadius: "50%",
+                                backgroundColor: showByTicker ? "var(--gold)" : "white",
+                                transform: showByTicker ? "translateX(21px)" : "translateX(3px)",
+                                transition: "transform 0.2s ease, background-color 0.2s ease",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                            }}
                         />
                     </button>
-                    <span className="text-sm text-gray-400">By Ticker</span>
+                    <span style={{ fontSize: "12px", color: "var(--muted)" }}>Par ticker</span>
                 </div>
             </div>
 
-            {monthlyData.some((d) => d.total > 0) ? (
-                <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={monthlyData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="month" stroke="#9ca3af" fontSize={12} />
-                        <YAxis tickFormatter={(v) => `${v.toFixed(2)}€`} stroke="#9ca3af" fontSize={12} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255, 255, 255, 0.1)" }} />
+            {hasData ? (
+                <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={monthlyData} barCategoryGap="30%">
+                        <CartesianGrid
+                            strokeDasharray="2 8"
+                            stroke="rgba(196,168,106,0.3)"
+                            vertical={false}
+                        />
+                        <XAxis
+                            dataKey="month"
+                            tick={{ fill: "#8A8070", fontSize: 11, fontFamily: "'Inter', sans-serif" }}
+                            axisLine={false}
+                            tickLine={false}
+                        />
+                        <YAxis
+                            tickFormatter={(v) => `${v.toFixed(0)} €`}
+                            tick={{ fill: "#8A8070", fontSize: 11, fontFamily: "'Inter', sans-serif" }}
+                            axisLine={false}
+                            tickLine={false}
+                            width={52}
+                        />
+                        <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(196,168,106,0.08)" }} />
                         {showByTicker ? (
                             <>
                                 <Legend content={<CustomLegend />} />
                                 {tickers.map((ticker, index) => (
-                                    <Bar key={ticker} dataKey={ticker} stackId="dividends" fill={getTickerColor(index, tickers.length)} />
+                                    <Bar
+                                        key={ticker}
+                                        dataKey={ticker}
+                                        stackId="dividends"
+                                        fill={tickerColors[ticker] || `hsl(${(GOLD_HUE + index * 40) % 360}, 55%, 55%)`}
+                                        radius={index === tickers.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                                    />
                                 ))}
                             </>
                         ) : (
-                            <Bar dataKey="total" radius={[8, 8, 0, 0]}>
+                            <Bar dataKey="total" radius={[4, 4, 0, 0]}>
                                 {monthlyData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={getBarColor(entry.total)} />
+                                    <Cell key={`cell-${index}`} fill={getBarColor(entry.total, maxValue)} />
                                 ))}
                             </Bar>
                         )}
                     </BarChart>
                 </ResponsiveContainer>
             ) : (
-                <p className="text-gray-500 text-center py-8">No dividend payments for {year}</p>
+                <p style={{ color: "var(--muted)", textAlign: "center", padding: "32px 0", fontSize: "13px", margin: 0 }}>
+                    Aucun dividende pour {year}.
+                </p>
             )}
         </div>
     );

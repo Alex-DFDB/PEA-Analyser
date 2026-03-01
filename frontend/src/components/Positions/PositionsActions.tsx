@@ -17,24 +17,54 @@ const PositionsActions = ({
     loading: boolean;
     hasPositions: boolean;
 }) => {
+    const btnBase: React.CSSProperties = {
+        display: "flex",
+        alignItems: "center",
+        gap: "5px",
+        padding: "6px 12px",
+        borderRadius: "8px",
+        fontSize: "12px",
+        fontWeight: 500,
+        fontFamily: "'Inter', sans-serif",
+        cursor: "pointer",
+        border: "1px solid var(--cream-darker)",
+        transition: "all 0.15s ease",
+    };
+
     return (
-        <div className="flex gap-2">
+        <div style={{ display: "flex", gap: "8px" }}>
             <button
                 onClick={onRefresh}
                 disabled={loading || !hasPositions}
-                className="flex items-center gap-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed px-3 py-1.5 rounded text-sm cursor-pointer"
+                style={{
+                    ...btnBase,
+                    backgroundColor: loading || !hasPositions ? "var(--cream-dark)" : "white",
+                    color: loading || !hasPositions ? "var(--muted)" : "var(--green)",
+                    cursor: loading || !hasPositions ? "not-allowed" : "pointer",
+                }}
             >
-                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                {loading ? "Refreshing..." : "Refresh Prices"}
+                <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+                {loading ? "Actualisation..." : "Actualiser"}
             </button>
             <button
                 onClick={onAdd}
-                className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-sm cursor-pointer"
+                style={{
+                    ...btnBase,
+                    backgroundColor: "var(--ink)",
+                    color: "var(--gold)",
+                    borderColor: "var(--ink)",
+                }}
             >
-                <Plus className="w-4 h-4" /> Add
+                <Plus size={13} /> Ajouter
             </button>
-            <label className="flex items-center gap-1 bg-gray-600 hover:bg-gray-700 px-3 py-1.5 rounded text-sm cursor-pointer">
-                <input type="file" accept=".json" onChange={onImport} className="hidden" />
+            <label
+                style={{
+                    ...btnBase,
+                    backgroundColor: "white",
+                    color: "var(--muted)",
+                }}
+            >
+                <input type="file" accept=".json" onChange={onImport} style={{ display: "none" }} />
                 Import JSON
             </label>
         </div>

@@ -32,6 +32,30 @@ const PositionsTable = ({
 }) => {
     const [showForm, setShowForm] = useState(false);
     const [uploadLoading, setUploadLoading] = useState(false);
+    const [sortKey, setSortKey] = useState<string>("value");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+    const handleSort = (key: string) => {
+        if (sortKey === key) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+        } else {
+            setSortKey(key);
+            setSortDir("desc");
+        }
+    };
+
+    const getSortValue = (p: Position, key: string): number | string => {
+        switch (key) {
+            case "name":    return (p.name || p.ticker).toLowerCase();
+            case "qty":     return p.quantity;
+            case "buy":     return p.buyPrice;
+            case "current": return p.currentPrice;
+            case "value":   return p.currentPrice * p.quantity;
+            case "pv":      return (p.currentPrice - p.buyPrice) * p.quantity;
+            case "weight":  return p.currentPrice * p.quantity;
+            default:        return 0;
+        }
+    };
 
     const { fetchQuote, loading: addLoading } = useQuote();
     const { fetchQuotes } = useQuotes();
@@ -146,10 +170,49 @@ const PositionsTable = ({
         e.target.value = "";
     };
 
+    const thStyle: React.CSSProperties = {
+        fontSize: "10px",
+        fontWeight: 500,
+        letterSpacing: "1px",
+        textTransform: "uppercase",
+        color: "var(--muted)",
+        textAlign: "left",
+        paddingBottom: "12px",
+        borderBottom: "1px solid var(--cream-darker)",
+        userSelect: "none",
+        whiteSpace: "nowrap",
+    };
+
+    const SortTh = ({ label, sortId, align = "left" }: { label: string; sortId: string; align?: "left" | "right" }) => {
+        const active = sortKey === sortId;
+        return (
+            <th
+                style={{ ...thStyle, textAlign: align, cursor: "pointer" }}
+                onClick={() => handleSort(sortId)}
+            >
+                <span style={{ color: active ? "var(--ink)" : "var(--muted)" }}>
+                    {label}
+                    <span style={{ marginLeft: "4px", opacity: active ? 1 : 0.35 }}>
+                        {active && sortDir === "asc" ? "▲" : "▼"}
+                    </span>
+                </span>
+            </th>
+        );
+    };
+
     return (
-        <div className="lg:col-span-2 bg-gray-800 rounded-lg p-4">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="font-semibold">Positions</h2>
+        <div className="pea-card" style={{ padding: "24px", gridColumn: "span 2" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h2
+                    style={{
+                        margin: 0,
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "var(--ink)",
+                    }}
+                >
+                    Positions
+                </h2>
                 <PositionsActions
                     onRefresh={updatePrices}
                     onAdd={() => setShowForm(!showForm)}
@@ -163,36 +226,49 @@ const PositionsTable = ({
 
             {positions.length === 0 ? (
                 loading ? (
-                    <div className="space-y-4">
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         <Skeleton className="h-5 w-1/2" />
                         <Skeleton className="h-48 w-full" />
                     </div>
                 ) : (
-                    <p className="text-gray-500 text-center py-8">No positions yet. Click "Add" to get started.</p>
+                    <p style={{ color: "var(--muted)", textAlign: "center", padding: "32px 0", fontSize: "13px" }}>
+                        Aucune position. Cliquez sur « Ajouter » pour commencer.
+                    </p>
                 )
             ) : loading ? (
-                <div className="space-y-4">
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                     <Skeleton className="h-5 w-1/2" />
                     <Skeleton className="h-48 w-full" />
                 </div>
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", fontSize: "13px", borderCollapse: "collapse" }}>
                         <thead>
-                            <tr className="text-gray-400 text-left">
-                                <th className="pb-2">Name</th>
-                                <th className="pb-2">Quantity</th>
-                                <th className="pb-2">Buy Price</th>
-                                <th className="pb-2">Current Price</th>
-                                <th className="pb-2">Total Value</th>
-                                <th className="pb-2">Profit/Loss</th>
-                                <th className="pb-2"></th>
+                            <tr>
+                                <SortTh label="Valeur"       sortId="name" />
+                                <SortTh label="Quantité"     sortId="qty" />
+                                <SortTh label="Prix achat"   sortId="buy" />
+                                <SortTh label="Prix actuel"  sortId="current" />
+                                <SortTh label="Valeur totale" sortId="value" />
+                                <SortTh label="Plus-value"   sortId="pv" />
+                                <SortTh label="Poids"        sortId="weight" />
+                                <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {positions.map((p) => (
-                                <PositionRow key={p.ticker} position={p} onDelete={() => deletePosition(p.ticker)} />
-                            ))}
+                            {(() => {
+                                const total = positions.reduce((sum, p) => sum + p.currentPrice * p.quantity, 0);
+                                const sorted = [...positions].sort((a, b) => {
+                                    const va = getSortValue(a, sortKey);
+                                    const vb = getSortValue(b, sortKey);
+                                    if (va < vb) return sortDir === "asc" ? -1 : 1;
+                                    if (va > vb) return sortDir === "asc" ? 1 : -1;
+                                    return 0;
+                                });
+                                return sorted.map((p) => (
+                                    <PositionRow key={p.ticker} position={p} onDelete={() => deletePosition(p.ticker)} totalPortfolioValue={total} />
+                                ));
+                            })()}
                         </tbody>
                     </table>
                 </div>
