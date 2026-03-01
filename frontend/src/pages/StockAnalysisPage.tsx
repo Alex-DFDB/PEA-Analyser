@@ -234,7 +234,7 @@ const StockAnalysisPage = ({
                                     <span style={{ color: "var(--muted)" }}>Investi total</span>
                                     <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{metrics.totalInvested.toFixed(2)} €</span>
                                 </div>
-                                <div style={{ ...rowStyle, borderBottom: "none", paddingTop: "12px", marginTop: "4px", borderTop: "1px solid var(--cream-darker)" }}>
+                                <div style={{ ...rowStyle, borderBottom: "none", paddingTop: "12px", marginTop: "4px" }}>
                                     <span style={{ color: "var(--muted)" }}>Valeur actuelle</span>
                                     <span style={{ fontSize: "16px", fontWeight: 500, color: "var(--ink)" }}>
                                         {metrics.totalValue.toFixed(2)} €
@@ -260,7 +260,7 @@ const StockAnalysisPage = ({
                                     <span style={{ color: "var(--muted)" }}>Plus bas 52 sem.</span>
                                     <span style={{ fontWeight: 500, color: "var(--ink-soft)" }}>{metrics.low52Week.toFixed(2)} €</span>
                                 </div>
-                                <div style={{ ...rowStyle, borderBottom: "none", paddingTop: "12px", marginTop: "4px", borderTop: "1px solid var(--cream-darker)" }}>
+                                <div style={{ ...rowStyle, borderBottom: "none", paddingTop: "12px", marginTop: "4px" }}>
                                     <span style={{ color: "var(--muted)" }}>Performance 5 ans</span>
                                     <span
                                         className={`pea-badge ${metrics.changePercent >= 0 ? "pea-badge-green" : "pea-badge-red"}`}
